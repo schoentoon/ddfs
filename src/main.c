@@ -48,7 +48,9 @@ int main(int argc, char **argv)
     switch (iArg) {
     case 'f':
       if (watch_folder(optarg, IN_ALL_EVENTS))
-        printf("Watching folder %s.\n", optarg);
+        printf("Watching folder '%s'.\n", optarg);
+      else
+        fprintf(stderr, "There was an error adding '%s' to the file observer.\n", optarg);
       break;
     default:
     case 'h':
