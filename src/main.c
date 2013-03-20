@@ -17,12 +17,14 @@
 
 #include <event.h>
 #include <getopt.h>
+#include <string.h>
 
 #include "file_observer.h"
 
 static const struct option g_LongOpts[] = {
   { "help",      no_argument,       0, 'h' },
   { "folder",    required_argument, 0, 'f' },
+  { "recursive", no_argument,       0, 'r' },
   { 0, 0, 0, 0 }
 };
 
@@ -31,6 +33,7 @@ void usage()
   printf("USAGE: isyf [options]\n");
   printf("-h, --help\tShow this help.\n");
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
+  printf("-r, --recursive\tMonitor subfolders as well.\n");
 }
 
 void test(struct inotify_event* event)
@@ -42,15 +45,22 @@ void test(struct inotify_event* event)
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
+  char recursive = 0;
   struct event_base* event_base = event_base_new();
   initFileObserver(event_base, test);
-  while ((iArg = getopt_long(argc, argv, "hf:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hrf:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
+    case 'r':
+      recursive = 1;
+      break;
     case 'f':
-      if (watch_folder(optarg, IN_ALL_EVENTS))
-        printf("Watching folder '%s'.\n", optarg);
-      else
-        fprintf(stderr, "There was an error adding '%s' to the file observer.\n", optarg);
+      if (optarg[strlen(optarg)-1] == '/') {
+        size_t offset = strlen(optarg)-1;
+        optarg[offset] = '\0';
+        watch_folder(optarg, recursive, IN_ALL_EVENTS);
+        optarg[offset] = '/';
+      } else
+        watch_folder(optarg, recursive, IN_ALL_EVENTS);
       break;
     default:
     case 'h':

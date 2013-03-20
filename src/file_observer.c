@@ -16,6 +16,8 @@
  */
 
 #include "file_observer.h"
+#include <dirent.h>
+#include <string.h>
 
 static int inotifyfd = 0;
 static void (*inotifycallback)(struct inotify_event*) = NULL;
@@ -48,10 +50,28 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
   return 1;
 }
 
-int watch_folder(const char* folder, uint32_t mask)
+int watch_folder(const char* folder, char recursive, uint32_t mask)
 {
   int wd = inotify_add_watch(inotifyfd, folder, IN_ALL_EVENTS);
-  if (wd == -1)
+  if (wd == -1) {
+    fprintf(stderr, "There was an error adding '%s' to the file observer, error code %d.\n", folder, wd);
     return 0;
+  }
+  printf("Watching folder '%s'.\n", folder);
+  if (recursive) {
+    DIR* dir = opendir(folder);
+    struct dirent *dp = NULL;
+    while ((dp = readdir(dir)) != NULL) {
+      if (dp->d_type & DT_DIR && strcmp(dp->d_name, "..") != 0 && strcmp(dp->d_name, ".") != 0) {
+        size_t len = strlen(folder) + strlen(dp->d_name) + 2; /* 1 for / and 1 for \0 */
+        char fullpath[len];
+        snprintf(fullpath, len, "%s/%s", folder, dp->d_name);
+        char* ptr = malloc(len);
+        strcpy(ptr, fullpath);
+        watch_folder(ptr, recursive, mask);
+      }
+    }
+    closedir(dir);
+  }
   return 1;
 }
