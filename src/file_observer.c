@@ -62,7 +62,7 @@ int watch_folder(const char* folder, char recursive, uint32_t mask)
     DIR* dir = opendir(folder);
     struct dirent *dp = NULL;
     while ((dp = readdir(dir)) != NULL) {
-      if (dp->d_type & DT_DIR && strcmp(dp->d_name, "..") != 0 && strcmp(dp->d_name, ".") != 0) {
+      if (dp->d_type == DT_DIR && strcmp(dp->d_name, "..") != 0 && strcmp(dp->d_name, ".") != 0) {
         size_t len = strlen(folder) + strlen(dp->d_name) + 2; /* 1 for / and 1 for \0 */
         char fullpath[len];
         snprintf(fullpath, len, "%s/%s", folder, dp->d_name);
