@@ -26,4 +26,6 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
 
 int watch_folder(const char* folder, char recursive, uint32_t mask);
 
+char* get_folder(int wd);
+
 #endif //_FILE_OBSERVER_H

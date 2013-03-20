@@ -40,6 +40,7 @@ void test(struct inotify_event* event)
 {
   if (event->len > 0)
     printf("name = %s\n", event->name);
+  printf("In folder %s\n", get_folder(event->wd));
 }
 
 int main(int argc, char **argv)

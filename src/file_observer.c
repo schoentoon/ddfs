@@ -24,6 +24,29 @@ static void (*inotifycallback)(struct inotify_event*) = NULL;
 
 #define BUF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1))
 
+struct folder_wd_container {
+  int wd;
+  char* folder;
+  struct folder_wd_container* next;
+};
+
+static struct folder_wd_container* folders = NULL;
+
+static void assign_wd_folder(int wd, const char* folder)
+{
+  struct folder_wd_container* wd_container = malloc(sizeof(struct folder_wd_container));
+  wd_container->wd = wd;
+  wd_container->folder = (char*) folder;
+  wd_container->next = NULL;
+  if (folders) {
+    struct folder_wd_container* tmp = folders;
+    while (tmp->next)
+      tmp = tmp->next;
+    tmp->next = wd_container;
+  } else
+    folders = wd_container;
+}
+
 static void readcb(struct bufferevent* bev, void* args)
 {
   char buf[BUF_LEN];
@@ -57,6 +80,7 @@ int watch_folder(const char* folder, char recursive, uint32_t mask)
     fprintf(stderr, "There was an error adding '%s' to the file observer, error code %d.\n", folder, wd);
     return 0;
   }
+  assign_wd_folder(wd, folder);
   printf("Watching folder '%s'.\n", folder);
   if (recursive) {
     DIR* dir = opendir(folder);
@@ -75,4 +99,15 @@ int watch_folder(const char* folder, char recursive, uint32_t mask)
     closedir(dir);
   }
   return 1;
+}
+
+char* get_folder(int wd)
+{
+  struct folder_wd_container* node = folders;
+  while (node) {
+    if (node->wd == wd)
+      return node->folder;
+    node = node->next;
+  }
+  return NULL;
 }
