@@ -57,10 +57,10 @@ int main(int argc, char **argv)
       if (optarg[strlen(optarg)-1] == '/') {
         size_t offset = strlen(optarg)-1;
         optarg[offset] = '\0';
-        watch_folder(optarg);
+        watch_folder(optarg, IN_ALL_EVENTS);
         optarg[offset] = '/';
       } else
-        watch_folder(optarg);
+        watch_folder(optarg, IN_ALL_EVENTS);
       break;
     default:
     case 'h':

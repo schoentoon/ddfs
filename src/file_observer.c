@@ -65,7 +65,7 @@ static void readcb(struct bufferevent* bev, void* args)
       snprintf(fullpath, len, "%s/%s", folder, event->name);
       char* ptr = malloc(len);
       strcpy(ptr, fullpath);
-      watch_folder(ptr);
+      watch_folder(ptr, IN_ALL_EVENTS);
     }
     p += sizeof(struct inotify_event) + event->len;
   }
