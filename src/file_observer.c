@@ -19,6 +19,8 @@
 #include <dirent.h>
 #include <string.h>
 
+char recursive = 0;
+
 static int inotifyfd = 0;
 static void (*inotifycallback)(struct inotify_event*) = NULL;
 
@@ -56,6 +58,15 @@ static void readcb(struct bufferevent* bev, void* args)
     struct inotify_event *event = (struct inotify_event*) p;
     if (inotifycallback)
       inotifycallback(event);
+    if (recursive && event->mask & IN_CREATE && event->mask & IN_ISDIR && event->len > 0) {
+      char* folder = get_folder(event->wd);
+      size_t len = strlen(folder) + strlen(event->name) + 2; /* 1 for / and 1 for \0 */
+      char fullpath[len];
+      snprintf(fullpath, len, "%s/%s", folder, event->name);
+      char* ptr = malloc(len);
+      strcpy(ptr, fullpath);
+      watch_folder(ptr, IN_ALL_EVENTS);
+    }
     p += sizeof(struct inotify_event) + event->len;
   }
 }
@@ -73,7 +84,7 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
   return 1;
 }
 
-int watch_folder(const char* folder, char recursive, uint32_t mask)
+int watch_folder(const char* folder, uint32_t mask)
 {
   int wd = inotify_add_watch(inotifyfd, folder, IN_ALL_EVENTS);
   if (wd == -1) {
@@ -92,7 +103,7 @@ int watch_folder(const char* folder, char recursive, uint32_t mask)
         snprintf(fullpath, len, "%s/%s", folder, dp->d_name);
         char* ptr = malloc(len);
         strcpy(ptr, fullpath);
-        if (watch_folder(ptr, recursive, mask) == 0) {
+        if (watch_folder(ptr, mask) == 0) {
           closedir(dir);
           return 0;
         }
