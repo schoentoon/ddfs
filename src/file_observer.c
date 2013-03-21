@@ -92,8 +92,10 @@ int watch_folder(const char* folder, char recursive, uint32_t mask)
         snprintf(fullpath, len, "%s/%s", folder, dp->d_name);
         char* ptr = malloc(len);
         strcpy(ptr, fullpath);
-        if (watch_folder(ptr, recursive, mask) == 0)
+        if (watch_folder(ptr, recursive, mask) == 0) {
+          closedir(dir);
           return 0;
+        }
       }
     }
     closedir(dir);
