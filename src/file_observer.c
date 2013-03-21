@@ -65,7 +65,7 @@ static void readcb(struct bufferevent* bev, void* args)
       snprintf(fullpath, len, "%s/%s", folder, event->name);
       char* ptr = malloc(len);
       strcpy(ptr, fullpath);
-      watch_folder(ptr, IN_ALL_EVENTS);
+      watch_folder(ptr);
     }
     p += sizeof(struct inotify_event) + event->len;
   }
@@ -86,7 +86,7 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
 
 int watch_folder(const char* folder, uint32_t mask)
 {
-  int wd = inotify_add_watch(inotifyfd, folder, IN_ALL_EVENTS);
+  int wd = inotify_add_watch(inotifyfd, folder, mask);
   if (wd == -1) {
     fprintf(stderr, "There was an error adding '%s' to the file observer, error code %d.\n", folder, wd);
     return 0;
