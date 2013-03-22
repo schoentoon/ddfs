@@ -16,6 +16,7 @@
  */
 
 #include "file_observer.h"
+
 #include <dirent.h>
 #include <string.h>
 

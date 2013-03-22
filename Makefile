@@ -3,30 +3,22 @@ INC    := -Iinclude $(INC)
 LFLAGS := -levent
 DEFINES:= $(DEFINES)
 CC     := gcc
-BINARY := isyf
-DEPS   := build/main.o build/file_observer.o
 
-.PHONY: all clean dev
+.PHONY: all clean dev server install
 
-all: build $(DEPS) link
+all: build server
 
-dev: clean
-	DEFINES="-DDEV" $(MAKE)
+server:
+	$(MAKE) -C server
+
+dev: clean build
+	DEFINES="-DDEV" $(MAKE) -C server
 
 build:
 	-mkdir -p build bin
 
-%.o: $(patsubst build/%o,src/%c,$@)
-	$(CC) $(CFLAGS) $(DEFINES) $(INC) -c -o $@ $(patsubst build/%o,src/%c,$@)
-
-link: $(DEPS)
-	$(CC) $(CFLAGS) $(DEFINES) $(INC) -o bin/$(BINARY) $(DEPS) $(LFLAGS)
-
 clean:
 	rm -rfv build bin
-
-install:
-	cp bin/$(BINARY) /usr/bin/$(BINARY)
 
 clang:
 	$(MAKE) dev CC=clang
