@@ -19,6 +19,7 @@
 #include <getopt.h>
 #include <string.h>
 
+#include "listener.h"
 #include "file_observer.h"
 
 static const struct option g_LongOpts[] = {
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
       return 0;
     }
   }
+  initListener(event_base, 9002);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */
   event_base_free(event_base);
   return 0;

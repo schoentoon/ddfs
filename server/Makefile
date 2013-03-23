@@ -4,7 +4,7 @@ LFLAGS := -levent
 DEFINES:= $(DEFINES)
 CC     := gcc
 BINARY := isyf_server
-DEPS   := ../build/main.o ../build/file_observer.o
+DEPS   := ../build/main.o ../build/file_observer.o ../build/listener.o ../build/client.o
 
 .PHONY: all clean dev
 
