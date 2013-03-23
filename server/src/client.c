@@ -78,7 +78,7 @@ void client_eventcb(struct bufferevent* bev, short events, void* context)
       else
         clients = NULL;
     } else {
-      while (node->next) {
+      while (node) {
         if (node->next == client) {
           node->next = node->next->next;
           break;
