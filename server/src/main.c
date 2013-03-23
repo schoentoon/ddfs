@@ -22,10 +22,15 @@
 #include "listener.h"
 #include "file_observer.h"
 
+#include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 static const struct option g_LongOpts[] = {
   { "help",      no_argument,       0, 'h' },
   { "folder",    required_argument, 0, 'f' },
   { "recursive", no_argument,       0, 'r' },
+  { "port",      required_argument, 0, 'p' },
   { 0, 0, 0, 0 }
 };
 
@@ -35,6 +40,7 @@ void usage()
   printf("-h, --help\tShow this help.\n");
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
   printf("-r, --recursive\tMonitor subfolders as well.\n");
+  printf("-p, --port\tPort to listen on, defaults to 9002.\n");
 }
 
 void test(struct inotify_event* event)
@@ -49,7 +55,8 @@ int main(int argc, char **argv)
   int iArg, iOptIndex = -1;
   struct event_base* event_base = event_base_new();
   initFileObserver(event_base, test);
-  while ((iArg = getopt_long(argc, argv, "hrf:", g_LongOpts, &iOptIndex)) != -1) {
+  unsigned short listen_port = 9002;
+  while ((iArg = getopt_long(argc, argv, "hrf:p:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
     case 'r':
       recursive = 1;
@@ -63,13 +70,22 @@ int main(int argc, char **argv)
       } else
         watch_folder(optarg, IN_ALL_EVENTS);
       break;
+    case 'p': {
+      long tmp = strtol(optarg, NULL, 10);
+      if ((errno == ERANGE || (tmp == LONG_MAX || tmp == LONG_MIN)) || (errno != 0 && tmp == 0) || tmp < 0 || tmp > 65535) {
+        fprintf(stderr, "--port requires a valid port.\n");
+        return 1;
+      }
+      listen_port = (unsigned short) tmp;
+      break;
+    }
     default:
     case 'h':
       usage();
       return 0;
     }
   }
-  initListener(event_base, 9002);
+  initListener(event_base, listen_port);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */
   event_base_free(event_base);
   return 0;
