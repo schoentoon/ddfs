@@ -49,7 +49,9 @@ void add_client(struct bufferevent* bev)
       node = node->next;
     node->next = client;
   }
+#ifdef DEV
   printf("There are %d clients left.\n", count_clients());
+#endif
 }
 
 void free_client(struct client* client)
@@ -78,7 +80,9 @@ void client_readcb(struct bufferevent* bev, void* context)
   char buf[4096];
   size_t numRead = bufferevent_read(bev, buf, 4096);
   while (numRead) {
+#ifdef DEV
     printf("Buffer: %s\n", buf);
+#endif
     numRead = bufferevent_read(bev, buf, 4096);
   }
 }
@@ -91,5 +95,7 @@ void client_eventcb(struct bufferevent* bev, short events, void* context)
 {
   if (events & BEV_EVENT_EOF)
     free_client((struct client*) context);
+#ifdef DEV
   printf("There are %d clients left.\n", count_clients());
+#endif
 }
