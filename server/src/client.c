@@ -23,12 +23,24 @@
 
 struct client* clients = NULL;
 
-int count_clients()
+unsigned int count_clients()
 {
-  int count = 0;
+  unsigned int count = 0;
   struct client* node = clients;
   while (node) {
     count++;
+    node = node->next;
+  }
+  return count;
+}
+
+unsigned int write_to_clients(const char* data, size_t size)
+{
+  unsigned int count = 0;
+  struct client* node = clients;
+  while (node) {
+    if (bufferevent_write(node->bev, data, size) == 0)
+      count++;
     node = node->next;
   }
   return count;
@@ -82,6 +94,7 @@ void client_readcb(struct bufferevent* bev, void* context)
   while (numRead) {
 #ifdef DEV
     printf("Buffer: %s\n", buf);
+    //write_to_clients((const char*) &buf, numRead); /* Writing it back to all clients just for testing.. */
 #endif
     numRead = bufferevent_read(bev, buf, 4096);
   }

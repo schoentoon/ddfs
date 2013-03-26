@@ -28,6 +28,10 @@ struct client {
 
 void add_client(struct bufferevent* bev);
 
+unsigned int count_clients();
+
+unsigned int write_to_clients(const char* data, size_t size);
+
 void client_readcb(struct bufferevent* bev, void* context);
 
 void client_writecb(struct bufferevent* bev, void* context);
