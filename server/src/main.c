@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "listener.h"
+#include "file_callback.h"
 #include "file_observer.h"
 
 #include <errno.h>
@@ -43,18 +44,11 @@ void usage()
   printf("-p, --port\tPort to listen on, defaults to 9002.\n");
 }
 
-void test(struct inotify_event* event)
-{
-  if (event->len > 0)
-    printf("name = %s\n", event->name);
-  printf("In folder %s\n", get_folder(event->wd));
-}
-
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
   struct event_base* event_base = event_base_new();
-  initFileObserver(event_base, test);
+  initFileObserver(event_base, sendAllFiles);
   unsigned short listen_port = 9002;
   while ((iArg = getopt_long(argc, argv, "hrf:p:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
@@ -66,7 +60,6 @@ int main(int argc, char **argv)
         size_t offset = strlen(optarg)-1;
         optarg[offset] = '\0';
         watch_folder(optarg);
-        optarg[offset] = '/';
       } else
         watch_folder(optarg);
       break;
