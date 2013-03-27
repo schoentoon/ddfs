@@ -18,6 +18,7 @@
 #include "file_callback.h"
 
 #include "client.h"
+#include "defines.h"
 #include "file_observer.h"
 
 #include <fcntl.h>
@@ -58,14 +59,14 @@ void sendAllFiles(struct inotify_event* event)
         char header_buf[strlen(fullpath)*2];
         snprintf(header_buf, sizeof(header_buf), "\n%ld:%s\n", st.st_size, fullpath);
         write_to_clients((const char*) &header_buf, strlen(header_buf));
-        char buf[4096];
-        size_t numRead = read(fd, &buf, 4096);
+        char buf[BUFFER_SIZE];
+        size_t numRead = read(fd, &buf, BUFFER_SIZE);
         while (numRead) {
 #ifdef DEV //Not printing because it may contain binary data.
           printf("Read %zu bytes.\n", numRead);
 #endif
           write_to_clients((const char*) &buf, numRead);
-          numRead = read(fd, &buf, 4096);
+          numRead = read(fd, &buf, BUFFER_SIZE);
         }
       }
     } else

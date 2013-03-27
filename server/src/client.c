@@ -17,6 +17,8 @@
 
 #include "client.h"
 
+#include "defines.h"
+
 #include <stdlib.h>
 
 #include <event.h>
@@ -89,14 +91,14 @@ void free_client(struct client* client)
 
 void client_readcb(struct bufferevent* bev, void* context)
 {
-  char buf[4096];
-  size_t numRead = bufferevent_read(bev, buf, 4096);
+  char buf[BUFFER_SIZE];
+  size_t numRead = bufferevent_read(bev, buf, BUFFER_SIZE);
   while (numRead) {
 #ifdef DEV
     printf("Buffer: %s\n", buf);
     //write_to_clients((const char*) &buf, numRead); /* Writing it back to all clients just for testing.. */
 #endif
-    numRead = bufferevent_read(bev, buf, 4096);
+    numRead = bufferevent_read(bev, buf, BUFFER_SIZE);
   }
 }
 
