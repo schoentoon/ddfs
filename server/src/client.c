@@ -71,12 +71,9 @@ void add_client(struct bufferevent* bev)
 void free_client(struct client* client)
 {
   struct client* node = clients;
-  if (node == client) {
-    if (node->next)
-      clients = node->next;
-    else
-      clients = NULL;
-  } else {
+  if (node == client)
+    clients = node->next;
+  else {
     while (node) {
       if (node->next == client) {
         node->next = node->next->next;
