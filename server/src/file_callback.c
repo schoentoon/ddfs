@@ -17,10 +17,16 @@
 
 #include "file_callback.h"
 
+#include "client.h"
 #include "file_observer.h"
 
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 char* getFullPath(char* name, int wd)
 {
@@ -44,21 +50,27 @@ void sendAllFiles(struct inotify_event* event)
 #endif
   if (event->mask & IN_CLOSE_WRITE && event->len > 0) {
     char* fullpath = getFullPath(event->name, event->wd);
-    FILE *file = fopen(fullpath, "rb");
-    if (file) {
+    int fd = open(fullpath, 0);
+    if (fd) {
       printf("Full path: %s\n", fullpath);
-      char buf[4096];
-      size_t numRead = fread(&buf, 1, 4096, file);
-      while (numRead) {
-    #ifdef DEV
-        printf("Buffer: %s\n", buf);
-        //write_to_clients((const char*) &buf, numRead); /* Writing it back to all clients just for testing.. */
-    #endif
-        numRead = fread(&buf, 1, 4096, file);
+      struct stat st;
+      if (fstat(fd, &st) == 0) {
+        char header_buf[strlen(fullpath)*2];
+        snprintf(header_buf, sizeof(header_buf), "-%ld:%s-", st.st_size, fullpath);
+        write_to_clients((const char*) &header_buf, strlen(header_buf));
+        char buf[4096];
+        size_t numRead = read(fd, &buf, 4096);
+        while (numRead) {
+#ifdef DEV //Not printing because it may contain binary data.
+          printf("Read %zu bytes.\n", numRead);
+#endif
+          write_to_clients((const char*) &buf, numRead);
+          numRead = read(fd, &buf, 4096);
+        }
       }
     } else
       fprintf(stderr, "There was an error while opening this file :/\n");
-    fclose(file);
+    close(fd);
     free(fullpath);
   }
 }
