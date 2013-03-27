@@ -60,13 +60,12 @@ void sendAllFiles(struct inotify_event* event)
         snprintf(header_buf, sizeof(header_buf), "\n%ld:%s\n", st.st_size, fullpath);
         write_to_clients((const char*) &header_buf, strlen(header_buf));
         char buf[BUFFER_SIZE];
-        size_t numRead = read(fd, &buf, BUFFER_SIZE);
-        while (numRead) {
+        size_t numRead = 0;
+        while ((numRead = read(fd, &buf, BUFFER_SIZE))) {
 #ifdef DEV //Not printing because it may contain binary data.
           printf("Read %zu bytes.\n", numRead);
 #endif
           write_to_clients((const char*) &buf, numRead);
-          numRead = read(fd, &buf, BUFFER_SIZE);
         }
       }
     } else

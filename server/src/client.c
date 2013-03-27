@@ -92,13 +92,11 @@ void free_client(struct client* client)
 void client_readcb(struct bufferevent* bev, void* context)
 {
   char buf[BUFFER_SIZE];
-  size_t numRead = bufferevent_read(bev, buf, BUFFER_SIZE);
-  while (numRead) {
+  size_t numRead = 0;
+  while ((numRead = bufferevent_read(bev, buf, BUFFER_SIZE))) {
 #ifdef DEV
     printf("Buffer: %s\n", buf);
-    //write_to_clients((const char*) &buf, numRead); /* Writing it back to all clients just for testing.. */
 #endif
-    numRead = bufferevent_read(bev, buf, BUFFER_SIZE);
   }
 }
 
