@@ -23,6 +23,7 @@
 
 struct client {
   struct bufferevent* bev;
+  struct event* keepalive;
   struct client* next;
 };
 

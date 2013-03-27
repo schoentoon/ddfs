@@ -17,8 +17,7 @@
 
 #include "client.h"
 
-#include "defines.h"
-
+#include <string.h>
 #include <stdlib.h>
 
 #include <event.h>
@@ -52,6 +51,7 @@ void add_client(struct bufferevent* bev)
 {
   struct client* client = malloc(sizeof(struct client));
   client->bev = bev;
+  client->keepalive = NULL;
   client->next = NULL;
   bufferevent_setcb(bev, client_readcb, client_writecb, client_eventcb, client);
   bufferevent_enable(bev, EV_WRITE|EV_READ);
@@ -83,17 +83,49 @@ void free_client(struct client* client)
     }
   }
   bufferevent_free(client->bev);
+  if (client->keepalive) {
+    event_del(client->keepalive);
+    event_free(client->keepalive);
+  }
   free(client);
+}
+
+static void keep_alive_timer(evutil_socket_t fd, short event, void *context)
+{
+  struct client* client = (struct client*) context;
+  char keepalive[] = { '\n' };
+  bufferevent_write(client->bev, &keepalive, 1);
 }
 
 void client_readcb(struct bufferevent* bev, void* context)
 {
-  char buf[BUFFER_SIZE];
-  size_t numRead = 0;
-  while ((numRead = bufferevent_read(bev, buf, BUFFER_SIZE))) {
+  struct client* client = (struct client*) context;
+  struct evbuffer* buffer = bufferevent_get_input(bev);
+  char* line = NULL;
+  size_t len;
+  while ((line = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF))) {
+    char* key = malloc(len);
+    unsigned int value;
+    if (sscanf(line, "%d:%s", &value, key) == 2) {
 #ifdef DEV
-    printf("Buffer: %s\n", buf);
+      printf("Key: %s value: %d\n", key, value);
 #endif
+      if (strcmp(key, "keepalive") == 0) {
+        if (client->keepalive == NULL && value > 0) {
+          client->keepalive = event_new(bufferevent_get_base(bev), -1, EV_PERSIST, keep_alive_timer, client);
+          struct timeval tv;
+          evutil_timerclear(&tv);
+          tv.tv_sec = value;
+          tv.tv_usec = 0;
+          event_add(client->keepalive, &tv);
+        }
+      }
+    }
+    free(key);
+#ifdef DEV
+    printf("From client: %s\n", line);
+#endif
+    free(line);
   }
 }
 
