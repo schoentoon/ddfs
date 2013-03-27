@@ -118,6 +118,18 @@ void client_readcb(struct bufferevent* bev, void* context)
           tv.tv_sec = value;
           tv.tv_usec = 0;
           event_add(client->keepalive, &tv);
+        } else if (client->keepalive) {
+          event_del(client->keepalive);
+          event_free(client->keepalive);
+          client->keepalive = NULL;
+          if (value > 0) {
+            client->keepalive = event_new(bufferevent_get_base(bev), -1, EV_PERSIST, keep_alive_timer, client);
+            struct timeval tv;
+            evutil_timerclear(&tv);
+            tv.tv_sec = value;
+            tv.tv_usec = 0;
+            event_add(client->keepalive, &tv);
+          }
         }
       }
     }
