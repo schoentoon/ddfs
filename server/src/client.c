@@ -53,8 +53,8 @@ void add_client(struct bufferevent* bev)
   client->bev = bev;
   client->keepalive = NULL;
   client->next = NULL;
-  bufferevent_setcb(bev, client_readcb, client_writecb, client_eventcb, client);
-  bufferevent_enable(bev, EV_WRITE|EV_READ);
+  bufferevent_setcb(bev, client_readcb, NULL, client_eventcb, client);
+  bufferevent_enable(bev, EV_READ);
   if (clients == NULL)
     clients = client;
   else {
@@ -127,10 +127,6 @@ void client_readcb(struct bufferevent* bev, void* context)
 #endif
     free(line);
   }
-}
-
-void client_writecb(struct bufferevent* bev, void* context)
-{
 }
 
 void client_eventcb(struct bufferevent* bev, short events, void* context)

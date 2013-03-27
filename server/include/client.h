@@ -35,8 +35,6 @@ unsigned int write_to_clients(const char* data, size_t size);
 
 void client_readcb(struct bufferevent* bev, void* context);
 
-void client_writecb(struct bufferevent* bev, void* context);
-
 void client_eventcb(struct bufferevent* bev, short events, void* context);
 
 #endif //_CLIENT_H
