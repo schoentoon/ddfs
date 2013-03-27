@@ -56,7 +56,7 @@ void sendAllFiles(struct inotify_event* event)
       struct stat st;
       if (fstat(fd, &st) == 0) {
         char header_buf[strlen(fullpath)*2];
-        snprintf(header_buf, sizeof(header_buf), "-%ld:%s-", st.st_size, fullpath);
+        snprintf(header_buf, sizeof(header_buf), "\n%ld:%s\n", st.st_size, fullpath);
         write_to_clients((const char*) &header_buf, strlen(header_buf));
         char buf[4096];
         size_t numRead = read(fd, &buf, 4096);
