@@ -32,6 +32,7 @@ static const struct option g_LongOpts[] = {
   { "folder",    required_argument, 0, 'f' },
   { "recursive", no_argument,       0, 'r' },
   { "port",      required_argument, 0, 'p' },
+  { "version",   no_argument,       0, 'v' },
   { 0, 0, 0, 0 }
 };
 
@@ -42,6 +43,7 @@ void usage()
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
   printf("-r, --recursive\tMonitor subfolders as well.\n");
   printf("-p, --port\tPort to listen on, defaults to 9002.\n");
+  printf("-v, --version\tPrint the version.\n");
 }
 
 int main(int argc, char **argv)
@@ -50,7 +52,7 @@ int main(int argc, char **argv)
   struct event_base* event_base = event_base_new();
   initFileObserver(event_base, sendAllFiles);
   unsigned short listen_port = 9002;
-  while ((iArg = getopt_long(argc, argv, "hrf:p:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvrf:p:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
     case 'r':
       recursive = 1;
@@ -72,6 +74,9 @@ int main(int argc, char **argv)
       listen_port = (unsigned short) tmp;
       break;
     }
+    case 'v':
+      printf("Isyf Syncs Your Files ~ %s\n", VERSION);
+      return 0;
     default:
     case 'h':
       usage();

@@ -1,7 +1,8 @@
 CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
 INC    := -Iinclude $(INC)
 LFLAGS := -levent
-DEFINES:= $(DEFINES)
+VERSION:= $(shell git describe)
+DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
 CC     := gcc
 BINARY := isyf_server
 DEPS   := ../build/main.o ../build/file_observer.o ../build/listener.o ../build/client.o ../build/file_callback.o
