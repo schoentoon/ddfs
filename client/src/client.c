@@ -51,14 +51,18 @@ static void read_cb(struct bufferevent* bev, void* ctx)
       unsigned long bytes;
       char filename[strlen(header)];
       if (sscanf(header, "%ld:%s", &bytes, filename) == 2) {
+#ifdef DEV
         printf("File: %s is %ld bytes.\n", filename, bytes);
+#endif
         while (bytes > 0) {
           size_t read_size = (bytes > BUFFER_SIZE) ? bytes : BUFFER_SIZE;
           char buf[read_size];
           size_t read;
           if ((read = bufferevent_read(bev, &buf, read_size))) {
             read_size -= read;
+#ifdef DEV
             printf("Buffer: %s\n", buf);
+#endif
           }
         }
       }
