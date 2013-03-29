@@ -78,6 +78,9 @@ int main(int argc, char **argv)
   } else if (!folder) {
     fprintf(stderr, "No folder specified.\n");
     return 1;
+  } else if (chdir(folder) != 0) {
+    fprintf(stderr, "Couldn't change work directory to %s, does it even exist?\n", folder);
+    return 2;
   }
   struct event_base* event_base = event_base_new();
   startClient(event_base);
