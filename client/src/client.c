@@ -58,16 +58,23 @@ static void read_cb(struct bufferevent* bev, void* ctx)
         printf("File: %s is %ld bytes.\n", filename, bytes);
 #endif
         createDir(filename);
+        FILE* file = fopen(filename, "wb");
         while (bytes > 0) {
-          size_t read_size = (bytes > BUFFER_SIZE) ? bytes : BUFFER_SIZE;
+          size_t read_size = (bytes < BUFFER_SIZE) ? bytes : BUFFER_SIZE;
           char buf[read_size];
-          size_t read;
-          if ((read = bufferevent_read(bev, &buf, read_size))) {
-            read_size -= read;
 #ifdef DEV
-            printf("Buffer: %s\n", buf);
-#endif
-          }
+          printf("bufferevent_read() %d\n", bufferevent_read(bev, &buf, read_size));
+#endif DEV
+          bytes -= read_size;
+          if (file)
+            fwrite(&buf, 1, read_size, file);
+#ifdef DEV
+          printf("read_size: %zu, bytes: %ld\n", read_size, bytes);
+#endif DEV
+        }
+        if (file) {
+          fflush(file);
+          fclose(file);
         }
       }
     }
