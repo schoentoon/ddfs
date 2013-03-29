@@ -63,14 +63,14 @@ static void read_cb(struct bufferevent* bev, void* ctx)
           size_t read_size = (bytes < BUFFER_SIZE) ? bytes : BUFFER_SIZE;
           char buf[read_size];
 #ifdef DEV
-          printf("bufferevent_read() %d\n", bufferevent_read(bev, &buf, read_size));
-#endif DEV
+          printf("bufferevent_read() %zd\n", bufferevent_read(bev, &buf, read_size));
+#endif
           bytes -= read_size;
           if (file)
             fwrite(&buf, 1, read_size, file);
 #ifdef DEV
           printf("read_size: %zu, bytes: %ld\n", read_size, bytes);
-#endif DEV
+#endif
         }
         if (file) {
           fflush(file);
