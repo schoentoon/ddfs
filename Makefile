@@ -4,21 +4,26 @@ LFLAGS := -levent
 DEFINES:= $(DEFINES)
 CC     := gcc
 
-.PHONY: all clean dev server install
+.PHONY: all clean dev server client install
 
-all: build server
+all: build server client
 
 server:
 	$(MAKE) -C server
 
+client:
+	$(MAKE) -C client
+
 dev: clean build
-	DEFINES="-DDEV" $(MAKE) -C server
+	DEFINES="-DDEV" $(MAKE)
 
 build:
-	-mkdir -p build bin
+	-mkdir build bin
 
 clean:
 	rm -rfv build bin
+	$(MAKE) -C server clean
+	$(MAKE) -C client clean
 
 clang:
 	$(MAKE) dev CC=clang
