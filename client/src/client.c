@@ -19,9 +19,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
 #include <event2/dns.h>
-#include <stdlib.h>
 
 char* server = NULL;
 unsigned short port = 9002;
@@ -31,6 +32,7 @@ struct evdns_base* dns = NULL;
 
 static void read_cb(struct bufferevent* bev, void* ctx);
 static void event_cb(struct bufferevent* bev, short events, void* ctx);
+static void createDir(char* filename);
 
 int startClient(struct event_base* event_base)
 {
@@ -55,6 +57,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
 #ifdef DEV
         printf("File: %s is %ld bytes.\n", filename, bytes);
 #endif
+        createDir(filename);
         while (bytes > 0) {
           size_t read_size = (bytes > BUFFER_SIZE) ? bytes : BUFFER_SIZE;
           char buf[read_size];
@@ -78,4 +81,21 @@ static void event_cb(struct bufferevent* bev, short events, void* ctx)
     startClient(bufferevent_get_base(bev));
     bufferevent_free(bev);
   }
+}
+
+static void createDir(char* filename)
+{
+  size_t len = strlen(filename);
+  size_t last_dir = 0;
+  int i;
+  for (i = 0; i < len; i++) {
+    if (filename[i] == '/')
+      last_dir = i;
+  }
+  filename[last_dir] = '\0';
+#ifdef DEV
+  printf("Creating dir: %s\n", filename);
+#endif
+  mkdir(filename, 0700);
+  filename[last_dir] = '/';
 }
