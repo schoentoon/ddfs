@@ -49,7 +49,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     char* header = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF);
     if (len > 0) {
       unsigned long bytes;
-      char* filename = malloc(strlen(header));
+      char filename[strlen(header)];
       if (sscanf(header, "%ld:%s", &bytes, filename) == 2) {
         printf("File: %s is %ld bytes.\n", filename, bytes);
         while (bytes > 0) {
@@ -62,7 +62,6 @@ static void read_cb(struct bufferevent* bev, void* ctx)
           }
         }
       }
-      free(filename);
     }
     free(header);
   } while (evbuffer_get_length(buffer) > 0);
