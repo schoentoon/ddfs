@@ -5,7 +5,7 @@ VERSION:= $(shell git describe)
 DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
 CC     := gcc
 BINARY := isyf
-DEPS   := build/main.o
+DEPS   := build/main.o build/client.o
 
 .PHONY: all clean dev
 

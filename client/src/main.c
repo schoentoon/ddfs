@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "client.h"
+
 #include <event.h>
 #include <errno.h>
 #include <unistd.h>
@@ -42,9 +44,6 @@ void usage()
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
-  struct event_base* event_base = event_base_new();
-  unsigned short port = 9002;
-  char* server = NULL;
   while ((iArg = getopt_long(argc, argv, "hvs:p:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
     case 'p': {
@@ -57,7 +56,6 @@ int main(int argc, char **argv)
       break;
     }
     case 's':
-      free(server);
       server = optarg;
       break;
     case 'v':
@@ -73,6 +71,8 @@ int main(int argc, char **argv)
     fprintf(stderr, "No server specified.\n");
     return 1;
   }
+  struct event_base* event_base = event_base_new();
+  startClient(event_base);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */
   event_base_free(event_base);
   return 0;
