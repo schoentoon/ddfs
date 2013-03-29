@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "client.h"
+#include "../../server/include/defines.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include <event2/dns.h>
+#include <stdlib.h>
 
 char* server = NULL;
 unsigned short port = 9002;
@@ -40,6 +43,29 @@ int startClient(struct event_base* event_base)
 
 static void read_cb(struct bufferevent* bev, void* ctx)
 {
+  struct evbuffer* buffer = bufferevent_get_input(bev);
+  do {
+    size_t len;
+    char* header = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF);
+    if (len > 0) {
+      unsigned long bytes;
+      char* filename = malloc(strlen(header));
+      if (sscanf(header, "%ld:%s", &bytes, filename) == 2) {
+        printf("File: %s is %ld bytes.\n", filename, bytes);
+        while (bytes > 0) {
+          size_t read_size = (bytes > BUFFER_SIZE) ? bytes : BUFFER_SIZE;
+          char buf[read_size];
+          size_t read;
+          if ((read = bufferevent_read(bev, &buf, read_size))) {
+            read_size -= read;
+            printf("Buffer: %s\n", buf);
+          }
+        }
+      }
+      free(filename);
+    }
+    free(header);
+  } while (evbuffer_get_length(buffer) > 0);
 }
 
 static void event_cb(struct bufferevent* bev, short events, void* ctx)
