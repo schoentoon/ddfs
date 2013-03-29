@@ -92,10 +92,12 @@ static void createDir(char* filename)
     if (filename[i] == '/')
       last_dir = i;
   }
-  filename[last_dir] = '\0';
+  if (last_dir != 0) {
+    filename[last_dir] = '\0';
 #ifdef DEV
-  printf("Creating dir: %s\n", filename);
+    printf("Creating dir: %s\n", filename);
 #endif
-  mkdir(filename, 0700);
-  filename[last_dir] = '/';
+    mkdir(filename, 0700);
+    filename[last_dir] = '/';
+  }
 }
