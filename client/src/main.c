@@ -25,6 +25,7 @@
 #include <getopt.h>
 
 static const struct option g_LongOpts[] = {
+  { "folder",    required_argument, 0, 'f' },
   { "help",      no_argument,       0, 'h' },
   { "server",    required_argument, 0, 's' },
   { "version",   no_argument,       0, 'v' },
@@ -36,6 +37,7 @@ void usage()
 {
   printf("USAGE: isyf [options]\n");
   printf("-h, --help\tShow this help.\n");
+  printf("-f, --folder\tWrite files to this folder.\n");
   printf("-s, --server\tServer to connect to.\n");
   printf("-p, --port\tConnect to the server on this port, defaults to 9002.\n");
   printf("-v, --version\tPrint the version.\n");
@@ -44,8 +46,11 @@ void usage()
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
-  while ((iArg = getopt_long(argc, argv, "hvs:p:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvs:p:f:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
+    case 'f':
+      folder = optarg;
+      break;
     case 'p': {
       long tmp = strtol(optarg, NULL, 10);
       if ((errno == ERANGE || (tmp == LONG_MAX || tmp == LONG_MIN)) || (errno != 0 && tmp == 0) || tmp < 0 || tmp > 65535) {
@@ -67,8 +72,11 @@ int main(int argc, char **argv)
       return 0;
     }
   }
-  if (server == NULL) {
+  if (!server) {
     fprintf(stderr, "No server specified.\n");
+    return 1;
+  } else if (!folder) {
+    fprintf(stderr, "No folder specified.\n");
     return 1;
   }
   struct event_base* event_base = event_base_new();

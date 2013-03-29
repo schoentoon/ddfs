@@ -25,6 +25,7 @@
 
 char* server = NULL;
 unsigned short port = 9002;
+char* folder = NULL;
 
 struct evdns_base* dns = NULL;
 
