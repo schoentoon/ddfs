@@ -30,6 +30,11 @@ char* folder = NULL;
 
 struct evdns_base* dns = NULL;
 
+struct client {
+  FILE* file;
+  unsigned long bytes_left;
+};
+
 static void read_cb(struct bufferevent* bev, void* ctx);
 static void event_cb(struct bufferevent* bev, short events, void* ctx);
 static void createDir(char* filename);
@@ -39,47 +44,49 @@ int startClient(struct event_base* event_base)
   if (!dns)
     dns = evdns_base_new(event_base, 1);
   struct bufferevent* bev = bufferevent_socket_new(event_base, -1, BEV_OPT_CLOSE_ON_FREE);
-  bufferevent_setcb(bev, read_cb, NULL, event_cb, NULL);
+  struct client* client = malloc(sizeof(struct client));
+  client->file = NULL;
+  client->bytes_left = 0;
+  bufferevent_setcb(bev, read_cb, NULL, event_cb, client);
   bufferevent_enable(bev, EV_READ);
   return bufferevent_socket_connect_hostname(bev, dns, AF_INET, server, port);
 }
 
 static void read_cb(struct bufferevent* bev, void* ctx)
 {
+  struct client* client = (struct client*) ctx;
   struct evbuffer* buffer = bufferevent_get_input(bev);
-  do {
+  if (client->bytes_left == 0) {
     size_t len;
     char* header = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF);
     if (len > 0) {
-      unsigned long bytes;
       char filename[strlen(header)];
-      if (sscanf(header, "%ld:%s", &bytes, filename) == 2) {
+      if (sscanf(header, "%ld:%s", &client->bytes_left, filename) == 2) {
 #ifdef DEV
-        printf("File: %s is %ld bytes.\n", filename, bytes);
+        printf("File: %s is %ld bytes.\n", filename, client->bytes_left);
 #endif
         createDir(filename);
-        FILE* file = fopen(filename, "wb");
-        while (bytes > 0) {
-          size_t read_size = (bytes < BUFFER_SIZE) ? bytes : BUFFER_SIZE;
-          char buf[read_size];
-#ifdef DEV
-          printf("bufferevent_read() %zd\n", bufferevent_read(bev, &buf, read_size));
-#endif
-          bytes -= read_size;
-          if (file)
-            fwrite(&buf, 1, read_size, file);
-#ifdef DEV
-          printf("read_size: %zu, bytes: %ld\n", read_size, bytes);
-#endif
-        }
-        if (file) {
-          fflush(file);
-          fclose(file);
-        }
+        client->file = fopen(filename, "wb");
       }
     }
     free(header);
-  } while (evbuffer_get_length(buffer) > 0);
+  }
+  while (client->bytes_left > 0) {
+    size_t read_size = (client->bytes_left < BUFFER_SIZE) ? client->bytes_left : BUFFER_SIZE;
+    if (evbuffer_get_length(buffer) < read_size)
+      return; /*Let's just get back later.. */
+    char buf[read_size];
+    client->bytes_left -= bufferevent_read(bev, &buf, read_size);
+    if (client->file)
+      fwrite(&buf, 1, read_size, client->file);
+  }
+  if (client->file && client->bytes_left == 0) {
+    fflush(client->file);
+    fclose(client->file);
+    client->file = NULL;
+  }
+  if (evbuffer_get_length(buffer) > 0)
+    read_cb(bev, ctx);
 }
 
 static void event_cb(struct bufferevent* bev, short events, void* ctx)
