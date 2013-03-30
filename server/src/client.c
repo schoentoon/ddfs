@@ -143,7 +143,7 @@ void client_readcb(struct bufferevent* bev, void* context)
 
 void client_eventcb(struct bufferevent* bev, short events, void* context)
 {
-  if (events & BEV_EVENT_EOF)
+  if (events & BEV_EVENT_EOF || events & BEV_ERROR || events & BEV_EVENT_TIMEOUT)
     free_client((struct client*) context);
 #ifdef DEV
   printf("There are %d clients left.\n", count_clients());
