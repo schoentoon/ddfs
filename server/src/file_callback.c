@@ -57,15 +57,12 @@ void sendAllFiles(struct inotify_event* event)
       struct stat st;
       if (fstat(fd, &st) == 0) {
         char header_buf[strlen(fullpath)*2];
-        snprintf(header_buf, sizeof(header_buf), "\n%ld:%s\n", st.st_size, fullpath);
-        write_to_clients((const char*) &header_buf, strlen(header_buf));
-        char buf[BUFFER_SIZE];
-        size_t numRead = 0;
-        while ((numRead = read(fd, &buf, BUFFER_SIZE))) {
-#ifdef DEV //Not printing because it may contain binary data.
-          printf("Read %zu bytes.\n", numRead);
-#endif
-          write_to_clients((const char*) &buf, numRead);
+        if (snprintf(header_buf, sizeof(header_buf), "\n%ld:%s\n", st.st_size, fullpath)) {
+          write_to_clients((const char*) &header_buf, strlen(header_buf));
+          char buf[BUFFER_SIZE];
+          size_t numRead = 0;
+          while ((numRead = read(fd, &buf, BUFFER_SIZE)))
+            write_to_clients((const char*) &buf, numRead);
         }
       }
     } else

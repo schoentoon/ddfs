@@ -104,7 +104,7 @@ void client_readcb(struct bufferevent* bev, void* context)
   char* line = NULL;
   size_t len;
   while ((line = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF))) {
-    char* key = malloc(len);
+    char key[len];
     unsigned int value;
     if (sscanf(line, "%d:%s", &value, key) == 2) {
 #ifdef DEV
@@ -133,7 +133,6 @@ void client_readcb(struct bufferevent* bev, void* context)
         }
       }
     }
-    free(key);
 #ifdef DEV
     printf("From client: %s\n", line);
 #endif
