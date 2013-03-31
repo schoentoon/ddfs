@@ -91,8 +91,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
 
 static void startClientTimer(evutil_socket_t fd, short events, void* ctx)
 {
-  struct event_base* base = (struct event_base*) ctx;
-  startClient(base);
+  startClient((struct event_base*) base);
 }
 
 static void event_cb(struct bufferevent* bev, short events, void* ctx)
