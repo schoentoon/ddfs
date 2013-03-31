@@ -38,7 +38,7 @@ static const struct option g_LongOpts[] = {
 
 void usage()
 {
-  printf("USAGE: isyf_server [options]\n");
+  printf("USAGE: ddfs_server [options]\n");
   printf("-h, --help\tShow this help.\n");
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
   printf("-r, --recursive\tMonitor subfolders as well.\n");

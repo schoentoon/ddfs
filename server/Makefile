@@ -4,7 +4,7 @@ LFLAGS := -levent
 VERSION:= $(shell git describe)
 DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
 CC     := gcc
-BINARY := isyf_server
+BINARY := ddfs_server
 DEPS   := build/main.o build/file_observer.o build/listener.o build/client.o build/file_callback.o
 
 .PHONY: all clean dev

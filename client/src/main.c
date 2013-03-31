@@ -36,7 +36,7 @@ static const struct option g_LongOpts[] = {
 
 void usage()
 {
-  printf("USAGE: isyf [options]\n");
+  printf("USAGE: ddfs [options]\n");
   printf("-h, --help\tShow this help.\n");
   printf("-f, --folder\tWrite files to this folder.\n");
   printf("-s, --server\tServer to connect to.\n");
