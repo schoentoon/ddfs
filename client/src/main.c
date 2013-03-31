@@ -41,7 +41,7 @@ void usage()
   printf("-f, --folder\tWrite files to this folder.\n");
   printf("-s, --server\tServer to connect to.\n");
   printf("-p, --port\tConnect to the server on this port, defaults to 9002.\n");
-  printf("-b, --backoff\tWait this amount of seconds between reconnect attempts.\n");
+  printf("-b, --backoff\tWait this amount of seconds between reconnect attempts, defaults to 10.\n");
   printf("-v, --version\tPrint the version.\n");
 }
 
