@@ -89,10 +89,22 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     read_cb(bev, ctx);
 }
 
+static void startClientTimer(evutil_socket_t fd, short events, void* ctx)
+{
+  struct event_base* base = (struct event_base*) ctx;
+  startClient(base);
+}
+
 static void event_cb(struct bufferevent* bev, short events, void* ctx)
 {
-  if (events & BEV_EVENT_EOF || events & BEV_ERROR || events & BEV_EVENT_TIMEOUT) {
-    startClient(bufferevent_get_base(bev));
+  if (events != BEV_EVENT_CONNECTED) {
+    struct event_base* base = bufferevent_get_base(bev);
+    struct event* timer = evtimer_new(base, startClientTimer, base);
+    struct timeval tv;
+    evutil_timerclear(&tv);
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
+    event_add(timer, &tv);
     bufferevent_free(bev);
   }
 }
