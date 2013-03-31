@@ -22,6 +22,7 @@
 char* server;
 unsigned short port;
 
+unsigned short backoff;
 char* folder;
 
 int startClient(struct event_base* event_base);

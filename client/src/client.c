@@ -27,6 +27,7 @@
 char* server = NULL;
 unsigned short port = 9002;
 char* folder = NULL;
+unsigned short backoff = 10;
 
 struct evdns_base* dns = NULL;
 
@@ -91,7 +92,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
 
 static void startClientTimer(evutil_socket_t fd, short events, void* ctx)
 {
-  startClient((struct event_base*) base);
+  startClient((struct event_base*) ctx);
 }
 
 static void event_cb(struct bufferevent* bev, short events, void* ctx)
@@ -101,7 +102,7 @@ static void event_cb(struct bufferevent* bev, short events, void* ctx)
     struct event* timer = evtimer_new(base, startClientTimer, base);
     struct timeval tv;
     evutil_timerclear(&tv);
-    tv.tv_sec = 10;
+    tv.tv_sec = backoff;
     tv.tv_usec = 0;
     event_add(timer, &tv);
     bufferevent_free(bev);
