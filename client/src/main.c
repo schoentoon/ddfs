@@ -1,4 +1,4 @@
-/*  isyf
+/*  ddfs
  *  Copyright (C) 2013  Toon Schoenmakers
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
       server = optarg;
       break;
     case 'v':
-      printf("Isyf Syncs Your Files ~ %s\n", VERSION);
+      printf("Dumb Distributed File System ~ %s\n", VERSION);
       return 0;
     default:
     case 'h':
