@@ -85,12 +85,15 @@ int main(int argc, char **argv)
   }
   if (!server) {
     fprintf(stderr, "No server specified.\n");
+    usage();
     return 1;
   } else if (!folder) {
     fprintf(stderr, "No folder specified.\n");
+    usage();
     return 1;
   } else if (chdir(folder) != 0) {
     fprintf(stderr, "Couldn't change work directory to %s, does it even exist?\n", folder);
+    usage();
     return 2;
   }
   struct event_base* event_base = event_base_new();
