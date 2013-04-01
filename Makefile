@@ -25,5 +25,9 @@ clean:
 	$(MAKE) -C server clean
 	$(MAKE) -C client clean
 
+install:
+	$(MAKE) -C server install
+	$(MAKE) -C client install
+
 clang:
 	$(MAKE) dev CC=clang
