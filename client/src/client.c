@@ -78,8 +78,12 @@ static void read_cb(struct bufferevent* bev, void* ctx)
       return; /*Let's just get back later.. */
     char buf[read_size];
     client->bytes_left -= bufferevent_read(bev, &buf, read_size);
-    if (client->file)
-      fwrite(&buf, 1, read_size, client->file);
+    if (client->file) {
+      if (fwrite(&buf, 1, read_size, client->file) != read_size) {
+        fclose(client->file); /* We failed to write the entire file, we should remove it.. */
+        client->file = NULL;
+      }
+    }
   }
   if (client->file && client->bytes_left == 0) {
     fflush(client->file);
@@ -120,10 +124,13 @@ static void createDir(char* filename)
   }
   if (last_dir != 0) {
     filename[last_dir] = '\0';
+    int output = mkdir(filename, 0700);
 #ifdef DEV
-    printf("Creating dir: %s\n", filename);
+    if (output == 0)
+      printf("Creating dir: %s\n", filename);
+#else
+    (void) output; /* Shut up compiler.. */
 #endif
-    mkdir(filename, 0700);
     filename[last_dir] = '/';
   }
 }
