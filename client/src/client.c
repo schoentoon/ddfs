@@ -67,7 +67,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     if (len > 0) {
       char filename[strlen(header)];
       if (sscanf(header, "%ld:%s", &client->bytes_left, filename) == 2) {
-        DEBUG("File: %s is %ld bytes.\n", filename, client->bytes_left);
+        DEBUG("File: %s is %ld bytes.", filename, client->bytes_left);
         createDir(filename);
         client->file = fopen(filename, "wb");
         client->filename = malloc(strlen(filename));

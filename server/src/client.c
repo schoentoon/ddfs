@@ -65,7 +65,7 @@ void add_client(struct bufferevent* bev)
       node = node->next;
     node->next = client;
   }
-  DEBUG("There are %d clients left.\n", count_clients());
+  DEBUG("There are %d clients left.", count_clients());
 }
 
 void free_client(struct client* client)
