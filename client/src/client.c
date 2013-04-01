@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "client.h"
-#include "../../server/include/defines.h"
+#include "defines.h"
 
 #include <stdio.h>
 #include <string.h>

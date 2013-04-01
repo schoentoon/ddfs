@@ -1,5 +1,5 @@
 CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
-INC    := -Iinclude $(INC)
+INC    := -Iinclude -I../include $(INC)
 LFLAGS := -levent
 VERSION:= $(shell git describe)
 DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
