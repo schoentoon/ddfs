@@ -1,11 +1,11 @@
 CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
-INC    := -Iinclude -I../include $(INC)
+INC    := -Iinclude -I../global $(INC)
 LFLAGS := -levent
 VERSION:= $(shell git describe)
 DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
 CC     := gcc
 BINARY := ddfs
-DEPS   := build/main.o build/client.o
+DEPS   := build/main.o build/client.o build/log.o
 
 .PHONY: all clean dev
 
@@ -16,6 +16,9 @@ build:
 
 dev: clean
 	DEFINES="-DDEV" $(MAKE)
+
+build/log.o: ../global/log.h ../global/log.c
+	$(CC) $(CFLAGS) $(DEFINES) $(INC) -c -o build/log.o ../global/log.c
 
 %.o: $(patsubst build/%o,src/%c,$@)
 	$(CC) $(CFLAGS) $(DEFINES) $(INC) -c -o $@ $(patsubst build/%o,src/%c,$@)

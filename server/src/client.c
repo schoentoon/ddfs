@@ -17,6 +17,8 @@
 
 #include "client.h"
 
+#include "log.h"
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -63,9 +65,7 @@ void add_client(struct bufferevent* bev)
       node = node->next;
     node->next = client;
   }
-#ifdef DEV
-  printf("There are %d clients left.\n", count_clients());
-#endif
+  DEBUG("There are %d clients left.\n", count_clients());
 }
 
 void free_client(struct client* client)
@@ -107,9 +107,7 @@ void client_readcb(struct bufferevent* bev, void* context)
     char key[len];
     unsigned int value;
     if (sscanf(line, "%d:%s", &value, key) == 2) {
-#ifdef DEV
-      printf("Key: %s value: %d\n", key, value);
-#endif
+      DEBUG("Key: %s value: %d", key, value);
       if (strcmp(key, "keepalive") == 0) {
         if (client->keepalive == NULL && value > 0) {
           client->keepalive = event_new(bufferevent_get_base(bev), -1, EV_PERSIST, keep_alive_timer, client);
@@ -133,9 +131,7 @@ void client_readcb(struct bufferevent* bev, void* context)
         }
       }
     }
-#ifdef DEV
-    printf("From client: %s\n", line);
-#endif
+    DEBUG("From client: %s", line);
     free(line);
   }
 }
@@ -144,7 +140,5 @@ void client_eventcb(struct bufferevent* bev, short events, void* context)
 {
   if (events != BEV_EVENT_CONNECTED) /* We should NEVER get the connected event here anyway.. */
     free_client((struct client*) context);
-#ifdef DEV
-  printf("There are %d clients left.\n", count_clients());
-#endif
+  DEBUG("There are %d clients left.", count_clients());
 }

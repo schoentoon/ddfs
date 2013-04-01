@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "client.h"
+
+#include "log.h"
 #include "defines.h"
 
 #include <stdio.h>
@@ -65,9 +67,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     if (len > 0) {
       char filename[strlen(header)];
       if (sscanf(header, "%ld:%s", &client->bytes_left, filename) == 2) {
-#ifdef DEV
-        printf("File: %s is %ld bytes.\n", filename, client->bytes_left);
-#endif
+        DEBUG("File: %s is %ld bytes.\n", filename, client->bytes_left);
         createDir(filename);
         client->file = fopen(filename, "wb");
         client->filename = malloc(strlen(filename));
@@ -86,7 +86,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
       if (fwrite(&buf, 1, read_size, client->file) != read_size) {
         fclose(client->file);
         if (remove(client->filename) != 0)
-          fprintf(stderr, "Failed to remove %s.\n", client->filename);
+          fprintf(stderr, "Failed to remove %s.", client->filename);
         client->file = NULL;
         free(client->filename);
         client->filename = NULL;
@@ -137,7 +137,7 @@ static void createDir(char* filename)
     int output = mkdir(filename, 0700);
 #ifdef DEV
     if (output == 0)
-      printf("Creating dir: %s\n", filename);
+      DEBUG("Created dir: %s", filename);
 #else
     (void) output; /* Shut up compiler.. */
 #endif

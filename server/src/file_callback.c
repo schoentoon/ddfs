@@ -17,6 +17,7 @@
 
 #include "file_callback.h"
 
+#include "log.h"
 #include "client.h"
 #include "defines.h"
 #include "file_observer.h"
@@ -41,19 +42,11 @@ char* getFullPath(char* name, int wd)
 
 void sendAllFiles(struct inotify_event* event)
 {
-#ifdef DEV
-  printf("---------------------------\n");
-  printf("mask %d\n", event->mask);
-  if (event->len > 0)
-    printf("name = %s\n", event->name);
-  printf("In folder %s\n", get_folder(event->wd));
-  printf("---------------------------\n");
-#endif
   if (event->mask & IN_CLOSE_WRITE && event->len > 0) {
     char* fullpath = getFullPath(event->name, event->wd);
     int fd = open(fullpath, 0);
     if (fd) {
-      printf("Full path: %s\n", fullpath);
+      DEBUG("Full path: %s", fullpath);
       struct stat st;
       if (fstat(fd, &st) == 0) {
         char header_buf[strlen(fullpath)*2];
