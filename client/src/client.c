@@ -33,6 +33,7 @@ struct evdns_base* dns = NULL;
 
 struct client {
   FILE* file;
+  char* filename;
   unsigned long bytes_left;
 };
 
@@ -47,6 +48,7 @@ int startClient(struct event_base* event_base)
   struct bufferevent* bev = bufferevent_socket_new(event_base, -1, BEV_OPT_CLOSE_ON_FREE);
   struct client* client = malloc(sizeof(struct client));
   client->file = NULL;
+  client->filename = NULL;
   client->bytes_left = 0;
   bufferevent_setcb(bev, read_cb, NULL, event_cb, client);
   bufferevent_enable(bev, EV_READ);
@@ -68,6 +70,8 @@ static void read_cb(struct bufferevent* bev, void* ctx)
 #endif
         createDir(filename);
         client->file = fopen(filename, "wb");
+        client->filename = malloc(strlen(filename));
+        strcpy(filename, client->filename);
       }
     }
     free(header);
@@ -80,8 +84,12 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     client->bytes_left -= bufferevent_read(bev, &buf, read_size);
     if (client->file) {
       if (fwrite(&buf, 1, read_size, client->file) != read_size) {
-        fclose(client->file); /* We failed to write the entire file, we should remove it.. */
+        fclose(client->file);
+        if (remove(client->filename) != 0)
+          fprintf(stderr, "Failed to remove %s.\n", client->filename);
         client->file = NULL;
+        free(client->filename);
+        client->filename = NULL;
       }
     }
   }
@@ -89,6 +97,8 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     fflush(client->file);
     fclose(client->file);
     client->file = NULL;
+    free(client->filename);
+    client->filename = NULL;
   }
   if (evbuffer_get_length(buffer) > 0)
     read_cb(bev, ctx);
