@@ -30,7 +30,7 @@ clean:
 	rm -rfv build
 
 install:
-	cp ../bin/$(BINARY) /usr/bin/$(BINARY)
+	cp -f ../bin/$(BINARY) /usr/bin/$(BINARY)
 
 clang:
 	$(MAKE) dev CC=clang
