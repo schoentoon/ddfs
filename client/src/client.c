@@ -134,7 +134,11 @@ static void createDir(char* filename)
   }
   if (last_dir != 0) {
     filename[last_dir] = '\0';
+#ifndef WIN32
     int output = mkdir(filename, 0700);
+#else
+    int output = mkdir(filename);
+#endif
 #ifdef DEV
     if (output == 0)
       DEBUG("Created dir: %s", filename);
