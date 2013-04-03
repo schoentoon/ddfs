@@ -25,6 +25,8 @@ unsigned short port;
 unsigned short backoff;
 char* folder;
 
+unsigned int timeout;
+
 int startClient(struct event_base* event_base);
 
 #endif //_CLIENT_H

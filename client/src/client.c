@@ -30,6 +30,7 @@ char* server = NULL;
 unsigned short port = 9002;
 char* folder = NULL;
 unsigned short backoff = 10;
+unsigned int timeout = 0;
 
 struct evdns_base* dns = NULL;
 
@@ -54,6 +55,7 @@ int startClient(struct event_base* event_base)
   client->bytes_left = 0;
   bufferevent_setcb(bev, read_cb, NULL, event_cb, client);
   bufferevent_enable(bev, EV_READ);
+  bufferevent_settimeout(bev, timeout, 0);
   return bufferevent_socket_connect_hostname(bev, dns, AF_INET, server, port);
 }
 
@@ -112,6 +114,7 @@ static void startClientTimer(evutil_socket_t fd, short events, void* ctx)
 static void event_cb(struct bufferevent* bev, short events, void* ctx)
 {
   if (events != BEV_EVENT_CONNECTED) {
+    DEBUG("event_cb(%d)", events);
     struct event_base* base = bufferevent_get_base(bev);
     struct event* timer = evtimer_new(base, startClientTimer, base);
     struct timeval tv;
@@ -120,7 +123,8 @@ static void event_cb(struct bufferevent* bev, short events, void* ctx)
     tv.tv_usec = 0;
     event_add(timer, &tv);
     bufferevent_free(bev);
-  }
+  } else
+    DEBUG("Client succesfully connected.");
 }
 
 static void createDir(char* filename)

@@ -31,6 +31,7 @@ static const struct option g_LongOpts[] = {
   { "version",   no_argument,       0, 'v' },
   { "port",      required_argument, 0, 'p' },
   { "backoff",   required_argument, 0, 'b' },
+  { "timeout",   required_argument, 0, 't' },
   { 0, 0, 0, 0 }
 };
 
@@ -42,13 +43,14 @@ void usage()
   printf("-s, --server\tServer to connect to.\n");
   printf("-p, --port\tConnect to the server on this port, defaults to 9002.\n");
   printf("-b, --backoff\tWait this amount of seconds between reconnect attempts, defaults to 10.\n");
+  printf("-t, --timeout\tUse this amount of seconds as a read timeout, 0 is disabled.\n");
   printf("-v, --version\tPrint the version.\n");
 }
 
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
-  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
     case 'f':
       folder = optarg;
@@ -69,6 +71,15 @@ int main(int argc, char **argv)
         return 1;
       }
       backoff = (unsigned short) tmp;
+      break;
+    }
+    case 't': {
+      long tmp = strtol(optarg, NULL, 10);
+      if ((errno == ERANGE || (tmp == LONG_MAX || tmp == LONG_MIN)) || (errno != 0 && tmp == 0) || tmp < 0) {
+        fprintf(stderr, "--timeout requires a valid amount of seconds.\n");
+        return 1;
+      }
+      timeout = (unsigned int) tmp;
       break;
     }
     case 's':
