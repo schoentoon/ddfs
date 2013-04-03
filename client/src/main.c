@@ -120,6 +120,10 @@ int main(int argc, char **argv)
   }
   if (keepalive > timeout)
     fprintf(stderr, "Keepalive is bigger than the timeout, this is NOT recommended.\n");
+#ifdef _WIN32
+  WSADATA wsa_data;
+  WSAStartup(MAKEWORD(2, 2), &wsa_data);
+#endif //_WIN32
   struct event_base* event_base = event_base_new();
   startClient(event_base);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */

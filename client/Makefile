@@ -26,6 +26,9 @@ build/log.o: ../global/log.h ../global/log.c
 link: $(DEPS)
 	$(CC) $(CFLAGS) $(DEFINES) $(INC) -o ../bin/$(BINARY) $(DEPS) $(LFLAGS)
 
+windows:
+	$(MAKE) dev CC=i686-w64-mingw32-gcc LFLAGS="-lws2_32 -levent"
+
 clean:
 	rm -rfv build
 
