@@ -26,6 +26,7 @@ unsigned short backoff;
 char* folder;
 
 unsigned int timeout;
+unsigned int keepalive;
 
 int startClient(struct event_base* event_base);
 

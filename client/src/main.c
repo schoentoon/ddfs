@@ -32,6 +32,7 @@ static const struct option g_LongOpts[] = {
   { "port",      required_argument, 0, 'p' },
   { "backoff",   required_argument, 0, 'b' },
   { "timeout",   required_argument, 0, 't' },
+  { "keepalive", required_argument, 0, 'k' },
   { 0, 0, 0, 0 }
 };
 
@@ -44,13 +45,14 @@ void usage()
   printf("-p, --port\tConnect to the server on this port, defaults to 9002.\n");
   printf("-b, --backoff\tWait this amount of seconds between reconnect attempts, defaults to 10.\n");
   printf("-t, --timeout\tUse this amount of seconds as a read timeout, 0 is disabled.\n");
+  printf("-k, --keepalive\tTell the server to use this as the keep alive interval, recommended when using --timeout.\n");
   printf("-v, --version\tPrint the version.\n");
 }
 
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
-  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
     case 'f':
       folder = optarg;
@@ -82,6 +84,15 @@ int main(int argc, char **argv)
       timeout = (unsigned int) tmp;
       break;
     }
+    case 'k': {
+      long tmp = strtol(optarg, NULL, 10);
+      if ((errno == ERANGE || (tmp == LONG_MAX || tmp == LONG_MIN)) || (errno != 0 && tmp == 0) || tmp < 0) {
+        fprintf(stderr, "--keepalive requires a valid amount of seconds.\n");
+        return 1;
+      }
+      keepalive = (unsigned int) tmp;
+      break;
+    }
     case 's':
       server = optarg;
       break;
@@ -107,6 +118,8 @@ int main(int argc, char **argv)
     usage();
     return 2;
   }
+  if (keepalive > timeout)
+    fprintf(stderr, "Keepalive is bigger than the timeout, this is NOT recommended.\n");
   struct event_base* event_base = event_base_new();
   startClient(event_base);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */

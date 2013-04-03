@@ -31,6 +31,7 @@ unsigned short port = 9002;
 char* folder = NULL;
 unsigned short backoff = 10;
 unsigned int timeout = 0;
+unsigned int keepalive = 0;
 
 struct evdns_base* dns = NULL;
 
@@ -123,8 +124,14 @@ static void event_cb(struct bufferevent* bev, short events, void* ctx)
     tv.tv_usec = 0;
     event_add(timer, &tv);
     bufferevent_free(bev);
-  } else
+  } else {
     DEBUG("Client succesfully connected.");
+    if (keepalive) {
+      char buf[BUFFER_SIZE];
+      if (sprintf(buf, "%d:keepalive\n", keepalive))
+        bufferevent_write(bev, &buf, strlen(buf));
+    }
+  }
 }
 
 static void createDir(char* filename)
