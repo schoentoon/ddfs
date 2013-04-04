@@ -65,19 +65,24 @@ static void read_cb(struct bufferevent* bev, void* ctx)
   struct client* client = (struct client*) ctx;
   struct evbuffer* buffer = bufferevent_get_input(bev);
   if (client->bytes_left == 0) {
-    size_t len;
-    char* header = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF);
-    if (len > 0) {
-      char filename[strlen(header)];
-      if (sscanf(header, "%ld:%s", &client->bytes_left, filename) == 2) {
-        DEBUG("File: %s is %ld bytes.", filename, client->bytes_left);
-        createDir(filename);
-        client->file = fopen(filename, "wb");
-        client->filename = malloc(strlen(filename));
-        strcpy(filename, client->filename);
+    if (evbuffer_pullup(buffer, 1)[0] == '\n') {
+      char buf[1]; /* This seems to be our keepalive packet, read it and leave it */
+      bufferevent_read(bev, &buf, 1);
+    } else {
+      size_t len;
+      char* header = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF);
+      if (len > 0 && header) {
+        char filename[strlen(header)];
+        if (sscanf(header, "%ld:%s", &client->bytes_left, filename) == 2) {
+          DEBUG("File: %s is %ld bytes.", filename, client->bytes_left);
+          createDir(filename);
+          client->file = fopen(filename, "wb");
+          client->filename = malloc(strlen(filename));
+          strcpy(filename, client->filename);
+        }
+        free(header);
       }
     }
-    free(header);
   }
   while (client->bytes_left > 0) {
     size_t read_size = (client->bytes_left < BUFFER_SIZE) ? client->bytes_left : BUFFER_SIZE;
