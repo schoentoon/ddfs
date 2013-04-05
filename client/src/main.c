@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <getopt.h>
+#include <signal.h>
 
 static const struct option g_LongOpts[] = {
   { "folder",    required_argument, 0, 'f' },
@@ -47,6 +48,12 @@ void usage()
   printf("-t, --timeout\tUse this amount of seconds as a read timeout, 0 is disabled.\n");
   printf("-k, --keepalive\tTell the server to use this as the keep alive interval, recommended when using --timeout.\n");
   printf("-v, --version\tPrint the version.\n");
+}
+
+void onSignal(int signal)
+{
+  shutdownClient();
+  exit(0);
 }
 
 int main(int argc, char **argv)
@@ -126,6 +133,8 @@ int main(int argc, char **argv)
 #endif //_WIN32
   struct event_base* event_base = event_base_new();
   startClient(event_base);
+  signal(SIGINT, onSignal);
+  signal(SIGTERM, onSignal);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */
   event_base_free(event_base);
   return 0;

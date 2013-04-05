@@ -30,4 +30,6 @@ unsigned int keepalive;
 
 int startClient(struct event_base* event_base);
 
+void shutdownClient();
+
 #endif //_CLIENT_H
