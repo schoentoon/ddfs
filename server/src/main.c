@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <event.h>
-#include <getopt.h>
-#include <string.h>
-
+#include "log.h"
 #include "listener.h"
 #include "file_callback.h"
 #include "file_observer.h"
 
+#include <event.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
+#include <getopt.h>
+#include <string.h>
 
 static const struct option g_LongOpts[] = {
   { "help",      no_argument,       0, 'h' },
@@ -44,6 +45,14 @@ void usage()
   printf("-r, --recursive\tMonitor subfolders as well.\n");
   printf("-p, --port\tPort to listen on, defaults to 9002.\n");
   printf("-v, --version\tPrint the version.\n");
+}
+
+void onSignal(int signal)
+{
+  DEBUG("Received the %d signal.", signal);
+  fprintf(stderr, "Shutting down.\n");
+  closeListener();
+  exit(0);
 }
 
 int main(int argc, char **argv)
@@ -84,6 +93,9 @@ int main(int argc, char **argv)
     }
   }
   initListener(event_base, listen_port);
+  signal(SIGINT, onSignal);
+  signal(SIGTERM, onSignal);
+  signal(SIGSTOP, onSignal);
   event_base_dispatch(event_base); /* We probably won't go further than this line.. */
   event_base_free(event_base);
   return 0;
