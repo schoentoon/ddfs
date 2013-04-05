@@ -67,7 +67,8 @@ int startClient(struct event_base* event_base)
 
 void shutdownClient()
 {
-  bufferevent_free(client->bev);
+  if (client->bev)
+    bufferevent_free(client->bev);
 }
 
 static void read_cb(struct bufferevent* bev, void* ctx)
@@ -139,6 +140,7 @@ static void event_cb(struct bufferevent* bev, short events, void* ctx)
     tv.tv_usec = 0;
     event_add(timer, &tv);
     bufferevent_free(bev);
+    client->bev = NULL;
   } else {
     DEBUG("Client succesfully connected.");
     if (keepalive) {
