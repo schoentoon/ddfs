@@ -46,7 +46,6 @@ void sendAllFiles(struct inotify_event* event)
     char* fullpath = getFullPath(event->name, event->wd);
     int fd = open(fullpath, 0);
     if (fd) {
-      DEBUG("Full path: %s", fullpath);
       struct stat st;
       if (fstat(fd, &st) == 0) {
         char header_buf[strlen(fullpath)*2];
@@ -57,10 +56,17 @@ void sendAllFiles(struct inotify_event* event)
           while ((numRead = read(fd, &buf, BUFFER_SIZE)))
             write_to_clients((const char*) &buf, numRead);
         }
-      }
+      } else
+        fprintf(stderr, "fstat failed on file %s :/\n", fullpath);
     } else
-      fprintf(stderr, "There was an error while opening this file :/\n");
+      fprintf(stderr, "There was an error while opening on file %s :/\n", fullpath);
     close(fd);
+    free(fullpath);
+  } else if (event->mask & IN_DELETE && event->len) {
+    char* fullpath = getFullPath(event->name, event->wd);
+    char header_buf[strlen(fullpath)*2];
+    if (snprintf(header_buf, sizeof(header_buf), "\nrm:%s\n", fullpath))
+      write_to_clients((const char*) &header_buf, strlen(header_buf));
     free(fullpath);
   }
 }

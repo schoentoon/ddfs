@@ -85,7 +85,7 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
   return 1;
 }
 
-#define DEFAULT_MASK (IN_CLOSE_WRITE)
+#define DEFAULT_MASK (IN_CLOSE_WRITE|IN_DELETE)
 
 int watch_folder(const char* folder)
 {
