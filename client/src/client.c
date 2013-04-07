@@ -90,6 +90,9 @@ static void read_cb(struct bufferevent* bev, void* ctx)
           client->file = fopen(filename, "wb");
           client->filename = malloc(strlen(filename));
           strcpy(filename, client->filename);
+        } else if (sscanf(header, "rm:%s", filename) == 1) {
+          DEBUG("Removing file %s.", filename);
+          remove(filename);
         }
         free(header);
       }
