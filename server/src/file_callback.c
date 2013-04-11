@@ -33,10 +33,11 @@
 char* getFullPath(char* name, int wd)
 {
   char* folder = get_folder(wd);
-  size_t len = strlen(folder) + strlen(name) + 2; /* 1 for / and 1 for \0 */
-  char fullpath[len];
-  snprintf(fullpath, len, "%s/%s", folder, name);
-  char* output = malloc(len);
+  if (!folder)
+    return NULL;
+  char fullpath[PATH_MAX];
+  snprintf(fullpath, sizeof(fullpath), "%s/%s", folder, name);
+  char* output = malloc(strlen(fullpath+1));
   return strcpy(output, fullpath);
 }
 
@@ -44,6 +45,8 @@ void sendAllFiles(struct inotify_event* event)
 {
   if (event->mask & IN_CLOSE_WRITE && event->len > 0) {
     char* fullpath = getFullPath(event->name, event->wd);
+    if (!fullpath)
+      return;
     int fd = open(fullpath, 0);
     if (fd) {
       struct stat st;
@@ -64,6 +67,8 @@ void sendAllFiles(struct inotify_event* event)
     free(fullpath);
   } else if (event->mask & IN_DELETE && event->len) {
     char* fullpath = getFullPath(event->name, event->wd);
+    if (!fullpath)
+      return;
     char header_buf[strlen(fullpath)*2];
     if (snprintf(header_buf, sizeof(header_buf), "\nrm:%s\n", fullpath))
       write_to_clients((const char*) &header_buf, strlen(header_buf));
