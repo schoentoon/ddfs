@@ -19,6 +19,7 @@
 #include "log.h"
 #include "defines.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -169,18 +170,21 @@ static void createDir(char* filename)
   }
   if (last_dir != 0) {
     filename[last_dir] = '\0';
+#ifdef DEV
     int output =
+#endif //DEV
 #ifndef _WIN32
     mkdir(filename, 0700);
 #else
     mkdir(filename);
 #endif
 #ifdef DEV
-    if (output == 0)
+    if (output == 0) {
       DEBUG("Created dir: %s", filename);
-#else
-    (void) output; /* Shut up compiler.. */
-#endif
+    } else {
+      DEBUG("There was an error creating directory %s, %s", filename, strerror(errno));
+    }
+#endif //DEV
     filename[last_dir] = '/';
   }
 }
