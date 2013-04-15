@@ -16,6 +16,7 @@
  */
 
 #include "client.h"
+#include "hook.h"
 
 #include <event.h>
 #include <errno.h>
@@ -34,6 +35,7 @@ static const struct option g_LongOpts[] = {
   { "backoff",   required_argument, 0, 'b' },
   { "timeout",   required_argument, 0, 't' },
   { "keepalive", required_argument, 0, 'k' },
+  { "hook",      required_argument, 0, 'H' },
   { 0, 0, 0, 0 }
 };
 
@@ -45,6 +47,7 @@ void usage()
   printf("-s, --server\tServer to connect to.\n");
   printf("-p, --port\tConnect to the server on this port, defaults to 9002.\n");
   printf("-b, --backoff\tWait this amount of seconds between reconnect attempts, defaults to 10.\n");
+  printf("-H, --hook\tExecute this command when connect, rsync for example.\n");
   printf("-t, --timeout\tUse this amount of seconds as a read timeout, 0 is disabled.\n");
   printf("-k, --keepalive\tTell the server to use this as the keep alive interval, recommended when using --timeout.\n");
   printf("-v, --version\tPrint the version.\n");
@@ -59,7 +62,7 @@ void onSignal(int signal)
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
-  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:H:", g_LongOpts, &iOptIndex)) != -1) {
     switch (iArg) {
     case 'f':
       folder = optarg;
@@ -103,6 +106,11 @@ int main(int argc, char **argv)
     case 's':
       server = optarg;
       break;
+    case 'H': {
+      struct hook* hook = new_hook();
+      hook->executable = optarg;
+      break;
+    }
     case 'v':
       printf("Dumb Distributed File System ~ %s\n", VERSION);
       return 0;

@@ -17,6 +17,7 @@
 #include "client.h"
 
 #include "log.h"
+#include "hook.h"
 #include "defines.h"
 
 #include <errno.h>
@@ -150,6 +151,7 @@ static void event_cb(struct bufferevent* bev, short events, void* ctx)
     bufferevent_free(bev);
     client->bev = NULL;
   } else {
+    execute_hooks();
     DEBUG("Client succesfully connected.");
     if (keepalive) {
       char buf[BUFFER_SIZE];
