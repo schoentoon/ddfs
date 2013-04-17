@@ -20,6 +20,11 @@
 
 #include <event.h>
 
+#ifndef NO_OPENSSL
+static char* private_key;
+static char* certificate;
+#endif
+
 int initListener(struct event_base* event_base, unsigned short listen_port);
 
 void closeListener();

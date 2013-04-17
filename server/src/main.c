@@ -29,11 +29,15 @@
 #include <string.h>
 
 static const struct option g_LongOpts[] = {
-  { "help",      no_argument,       0, 'h' },
-  { "folder",    required_argument, 0, 'f' },
-  { "recursive", no_argument,       0, 'r' },
-  { "port",      required_argument, 0, 'p' },
-  { "version",   no_argument,       0, 'v' },
+  { "help",        no_argument,       0, 'h' },
+  { "folder",      required_argument, 0, 'f' },
+  { "recursive",   no_argument,       0, 'r' },
+  { "port",        required_argument, 0, 'p' },
+  { "version",     no_argument,       0, 'v' },
+#ifndef NO_OPENSSL
+  { "private-key", required_argument, 0, 'P' },
+  { "certificate", required_argument, 0, 'C' },
+#endif
   { 0, 0, 0, 0 }
 };
 
@@ -44,6 +48,10 @@ void usage()
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
   printf("-r, --recursive\tMonitor subfolders as well.\n");
   printf("-p, --port\tPort to listen on, defaults to 9002.\n");
+#ifndef NO_OPENSSL
+  printf("-P, --private-key\tUse this private key file for the ssl.\n");
+  printf("-C, --certificate\tUse this certificate file for the ssl.\n");
+#endif
   printf("-v, --version\tPrint the version.\n");
 }
 
@@ -61,7 +69,11 @@ int main(int argc, char **argv)
   struct event_base* event_base = event_base_new();
   initFileObserver(event_base, sendAllFiles);
   unsigned short listen_port = 9002;
+#ifndef NO_OPENSSL
+  while ((iArg = getopt_long(argc, argv, "hvrf:p:P:C:", g_LongOpts, &iOptIndex)) != -1) {
+#else
   while ((iArg = getopt_long(argc, argv, "hvrf:p:", g_LongOpts, &iOptIndex)) != -1) {
+#endif
     switch (iArg) {
     case 'r':
       recursive = 1;
@@ -83,6 +95,14 @@ int main(int argc, char **argv)
       listen_port = (unsigned short) tmp;
       break;
     }
+#ifndef NO_OPENSSL
+    case 'P':
+      private_key = optarg;
+      break;
+    case 'C':
+      certificate = optarg;
+      break;
+#endif
     case 'v':
       printf("Dumb Distributed File System ~ %s\n", VERSION);
       return 0;
@@ -92,6 +112,12 @@ int main(int argc, char **argv)
       return 0;
     }
   }
+#ifndef NO_OPENSSL
+  if ((certificate && !private_key) || (!certificate && private_key)) {
+    fprintf(stderr, "To use openssl you need to specify both the certificate and the private key.\n");
+    return 1;
+  }
+#endif
   initListener(event_base, listen_port);
   signal(SIGINT, onSignal);
   signal(SIGTERM, onSignal);
