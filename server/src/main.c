@@ -45,14 +45,18 @@ void usage()
 {
   printf("USAGE: ddfs_server [options]\n");
   printf("-h, --help\tShow this help.\n");
+  printf("-v, --version\tPrint the version.\n");
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
   printf("-r, --recursive\tMonitor subfolders as well.\n");
   printf("-p, --port\tPort to listen on, defaults to 9002.\n");
 #ifndef NO_OPENSSL
   printf("-P, --private-key\tUse this private key file for the ssl.\n");
   printf("-C, --certificate\tUse this certificate file for the ssl.\n");
+  printf("To create these files use the following commands.\n");
+  printf("openssl genrsa -out pkey 2048\n");
+  printf("openssl req -new -key pkey -out cert.req\n");
+  printf("openssl x509 -req -days 365 -in cert.req -signkey pkey -out cert\n");
 #endif
-  printf("-v, --version\tPrint the version.\n");
 }
 
 void onSignal(int signal)

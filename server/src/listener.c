@@ -30,8 +30,8 @@
 #include <openssl/rand.h>
 #include <event2/bufferevent_ssl.h>
 
-static char* private_key = NULL;
-static char* certificate = NULL;
+char* private_key = NULL;
+char* certificate = NULL;
 
 SSL_CTX* ssl_context = NULL;
 
