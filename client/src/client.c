@@ -28,6 +28,15 @@
 
 #include <event2/dns.h>
 
+#ifndef NO_OPENSSL
+
+#include <openssl/ssl.h>
+#include <event2/bufferevent_ssl.h>
+
+unsigned char openssl = 0;
+
+#endif
+
 char* server = NULL;
 unsigned short port = 9002;
 char* folder = NULL;
@@ -59,12 +68,18 @@ int startClient(struct event_base* event_base)
     client->filename = NULL;
     client->bytes_left = 0;
   }
-  struct bufferevent* bev = bufferevent_socket_new(event_base, -1, BEV_OPT_CLOSE_ON_FREE);
-  client->bev = bev;
-  bufferevent_setcb(bev, read_cb, NULL, event_cb, client);
-  bufferevent_enable(bev, EV_READ);
-  bufferevent_settimeout(bev, timeout, 0);
-  return bufferevent_socket_connect_hostname(bev, dns, AF_INET, server, port);
+#ifndef NO_OPENSSL
+  if (openssl) {
+    SSL_CTX *ssl_ctx = SSL_CTX_new(SSLv3_method());
+    SSL *ssl = SSL_new(ssl_ctx);
+    client->bev = bufferevent_openssl_socket_new(event_base, -1, ssl, BUFFEREVENT_SSL_CONNECTING, BEV_OPT_CLOSE_ON_FREE);
+  } else
+#endif
+    client->bev = bufferevent_socket_new(event_base, -1, BEV_OPT_CLOSE_ON_FREE);
+  bufferevent_setcb(client->bev, read_cb, NULL, event_cb, client);
+  bufferevent_enable(client->bev, EV_READ);
+  bufferevent_settimeout(client->bev, timeout, 0);
+  return bufferevent_socket_connect_hostname(client->bev, dns, AF_INET, server, port);
 }
 
 void shutdownClient()

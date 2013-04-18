@@ -1,6 +1,6 @@
 CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
 INC    := -Iinclude -I../global $(INC)
-LFLAGS := -levent -lpthread
+LFLAGS := -levent -levent_openssl -lssl -lcrypto -lpthread
 VERSION:= $(shell git describe)
 DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
 CC     := gcc

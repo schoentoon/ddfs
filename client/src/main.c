@@ -26,6 +26,12 @@
 #include <getopt.h>
 #include <signal.h>
 
+#ifndef NO_OPENSSL
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
+#endif
+
 static const struct option g_LongOpts[] = {
   { "folder",    required_argument, 0, 'f' },
   { "help",      no_argument,       0, 'h' },
@@ -36,6 +42,9 @@ static const struct option g_LongOpts[] = {
   { "timeout",   required_argument, 0, 't' },
   { "keepalive", required_argument, 0, 'k' },
   { "hook",      required_argument, 0, 'H' },
+#ifndef NO_OPENSSL
+  { "openssl",   no_argument,       0, 'S' },
+#endif
   { 0, 0, 0, 0 }
 };
 
@@ -50,6 +59,7 @@ void usage()
   printf("-H, --hook\tExecute this command when connect, rsync for example.\n");
   printf("-t, --timeout\tUse this amount of seconds as a read timeout, 0 is disabled.\n");
   printf("-k, --keepalive\tTell the server to use this as the keep alive interval, recommended when using --timeout.\n");
+  printf("-S, --openssl\tUse openssl to connect to the server.\n");
   printf("-v, --version\tPrint the version.\n");
 }
 
@@ -62,7 +72,11 @@ void onSignal(int signal)
 int main(int argc, char **argv)
 {
   int iArg, iOptIndex = -1;
+#ifndef NO_OPENSSL
+  while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:H:S", g_LongOpts, &iOptIndex)) != -1) {
+#else
   while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:H:", g_LongOpts, &iOptIndex)) != -1) {
+#endif
     switch (iArg) {
     case 'f':
       folder = optarg;
@@ -111,6 +125,11 @@ int main(int argc, char **argv)
       hook->executable = optarg;
       break;
     }
+#ifndef NO_OPENSSL
+    case 'S':
+      openssl = 1;
+      break;
+#endif
     case 'v':
       printf("Dumb Distributed File System ~ %s\n", VERSION);
       return 0;
@@ -139,6 +158,13 @@ int main(int argc, char **argv)
   WSADATA wsa_data;
   WSAStartup(MAKEWORD(2, 2), &wsa_data);
 #endif //_WIN32
+#ifndef NO_OPENSSL
+  if (openssl) {
+    SSL_load_error_strings();
+    SSL_library_init();
+    RAND_poll();
+  }
+#endif
   struct event_base* event_base = event_base_new();
   startClient(event_base);
   signal(SIGINT, onSignal);

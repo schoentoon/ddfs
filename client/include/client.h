@@ -19,6 +19,10 @@
 
 #include <event.h>
 
+#ifndef NO_OPENSSL
+unsigned char openssl;
+#endif
+
 char* server;
 unsigned short port;
 
