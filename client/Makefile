@@ -2,7 +2,7 @@ CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
 INC    := -Iinclude -I../global $(INC)
 LFLAGS := -levent -levent_openssl -lssl -lcrypto -lpthread
 VERSION:= $(shell git describe)
-DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
+DEFINES:= -DVERSION=\"$(VERSION)\"
 CC     := gcc
 BINARY := ddfs
 DEPS   := build/main.o build/client.o build/log.o build/hook.o
@@ -27,7 +27,7 @@ link: $(DEPS)
 	$(CC) $(CFLAGS) $(DEFINES) $(INC) -o ../bin/$(BINARY) $(DEPS) $(LFLAGS)
 
 windows:
-	$(MAKE) dev CC=i686-w64-mingw32-gcc LFLAGS="-lws2_32 -levent"
+	$(MAKE) dev CC=i686-w64-mingw32-gcc LFLAGS="-lws2_32 -levent -lpthread" DEFINES="-DNO_OPENSSL -DVERSION=\\\"$(VERSION)\\\""
 
 clean:
 	rm -rfv build
