@@ -16,3 +16,5 @@
  */
 
 #define BUFFER_SIZE 4096
+
+//#define NO_OPENSSL //Uncomment this line to disable openssl
