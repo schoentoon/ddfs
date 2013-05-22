@@ -99,11 +99,10 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     } else {
       size_t len;
       char* header = evbuffer_readln(buffer, &len, EVBUFFER_EOL_CRLF);
-      if (len > 1024) { /* Incoming lines are NOT supposed to be this long.. */
-        free(header);
+      if (!header) {
         event_cb(bev, BEV_ERROR, ctx);
         return;
-      } else if (len > 0 && header) {
+      } else {
         char filename[strlen(header)];
         if (sscanf(header, "%ld:%s", &client->bytes_left, filename) == 2) {
           DEBUG("File: %s is %ld bytes.", filename, client->bytes_left);
