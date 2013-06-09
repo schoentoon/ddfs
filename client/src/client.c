@@ -115,6 +115,8 @@ static void read_cb(struct bufferevent* bev, void* ctx)
         free(header);
       }
     }
+    if (evbuffer_get_length(buffer) > 0)
+      read_cb(bev, ctx);
   }
   while (client->bytes_left > 0) {
     size_t read_size = (client->bytes_left < BUFFER_SIZE) ? client->bytes_left : BUFFER_SIZE;
@@ -139,6 +141,8 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     client->file = NULL;
     free(client->filename);
     client->filename = NULL;
+    if (evbuffer_get_length(buffer) > 0)
+      read_cb(bev, ctx);
   }
 }
 
