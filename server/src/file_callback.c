@@ -37,8 +37,7 @@ char* getFullPath(char* name, int wd)
     return NULL;
   char fullpath[PATH_MAX];
   snprintf(fullpath, sizeof(fullpath), "%s/%s", folder, name);
-  char* output = malloc(strlen(fullpath+1));
-  return strcpy(output, fullpath);
+  return strdup(fullpath);
 }
 
 void sendAllFiles(struct inotify_event* event)

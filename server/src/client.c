@@ -52,9 +52,8 @@ unsigned int write_to_clients(const char* data, size_t size)
 void add_client(struct bufferevent* bev)
 {
   struct client* client = malloc(sizeof(struct client));
+  memset(client, 0, sizeof(struct client));
   client->bev = bev;
-  client->keepalive = NULL;
-  client->next = NULL;
   bufferevent_setcb(bev, client_readcb, NULL, client_eventcb, client);
   bufferevent_enable(bev, EV_READ);
   if (clients == NULL)

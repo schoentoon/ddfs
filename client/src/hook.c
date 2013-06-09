@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <pthread.h>
 
 struct hook *hooks = NULL;
@@ -28,7 +29,7 @@ struct hook *hooks = NULL;
 struct hook* new_hook()
 {
   struct hook* output = malloc(sizeof(struct hook));
-  output->next = NULL;
+  memset(output, 0, sizeof(struct hook));
   if (!hooks)
     hooks = output;
   else {

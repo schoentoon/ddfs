@@ -64,9 +64,7 @@ int startClient(struct event_base* event_base)
   if (!dns) {
     dns = evdns_base_new(event_base, 1);
     client = malloc(sizeof(struct client));
-    client->file = NULL;
-    client->filename = NULL;
-    client->bytes_left = 0;
+    memset(client, 0, sizeof(struct client));
   }
 #ifndef NO_OPENSSL
   if (openssl) {
@@ -108,8 +106,8 @@ static void read_cb(struct bufferevent* bev, void* ctx)
           DEBUG("File: %s is %ld bytes.", filename, client->bytes_left);
           createDir(filename);
           client->file = fopen(filename, "wb");
-          client->filename = malloc(strlen(filename));
-          strcpy(filename, client->filename);
+          free(client->filename);
+          client->filename = strdup(client->filename);
         } else if (sscanf(header, "rm:%s", filename) == 1) {
           DEBUG("Removing file %s.", filename);
           remove(filename);
@@ -142,8 +140,6 @@ static void read_cb(struct bufferevent* bev, void* ctx)
     free(client->filename);
     client->filename = NULL;
   }
-  if (evbuffer_get_length(buffer) > 0)
-    read_cb(bev, ctx);
 }
 
 static void startClientTimer(evutil_socket_t fd, short events, void* ctx)

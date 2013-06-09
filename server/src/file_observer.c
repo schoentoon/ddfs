@@ -38,9 +38,9 @@ static struct folder_wd_container* folders = NULL;
 static void assign_wd_folder(int wd, const char* folder)
 {
   struct folder_wd_container* wd_container = malloc(sizeof(struct folder_wd_container));
+  memset(wd_container, 0, sizeof(struct folder_wd_container));
   wd_container->wd = wd;
   wd_container->folder = (char*) folder;
-  wd_container->next = NULL;
   if (folders) {
     struct folder_wd_container* tmp = folders;
     while (tmp->next)
@@ -64,9 +64,7 @@ static void readcb(struct bufferevent* bev, void* args)
         char* folder = get_folder(event->wd);
         char fullpath[PATH_MAX];
         snprintf(fullpath, sizeof(fullpath), "%s/%s", folder, folder);
-        char* output = malloc(strlen(fullpath+1));
-        strcpy(output, fullpath);
-        watch_folder(output);
+        watch_folder(strdup(fullpath));
       }
       p += sizeof(struct inotify_event) + event->len;
     }
@@ -105,9 +103,7 @@ int watch_folder(const char* folder)
         size_t len = strlen(folder) + strlen(dp->d_name) + 2; /* 1 for / and 1 for \0 */
         char fullpath[len];
         snprintf(fullpath, len, "%s/%s", folder, dp->d_name);
-        char* ptr = malloc(len);
-        strcpy(ptr, fullpath);
-        if (watch_folder(ptr) == 0) {
+        if (watch_folder(strdup(fullpath)) == 0) {
           closedir(dir);
           return 0;
         }
