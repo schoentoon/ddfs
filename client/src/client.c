@@ -107,7 +107,7 @@ static void read_cb(struct bufferevent* bev, void* ctx)
           createDir(filename);
           client->file = fopen(filename, "wb");
           free(client->filename);
-          client->filename = strdup(client->filename);
+          client->filename = strdup(filename);
         } else if (sscanf(header, "rm:%s", filename) == 1) {
           DEBUG("Removing file %s.", filename);
           remove(filename);
