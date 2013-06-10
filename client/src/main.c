@@ -48,8 +48,7 @@ static const struct option g_LongOpts[] = {
   { 0, 0, 0, 0 }
 };
 
-void usage()
-{
+void usage() {
   printf("USAGE: ddfs [options]\n");
   printf("-h, --help\tShow this help.\n");
   printf("-f, --folder\tWrite files to this folder.\n");
@@ -63,16 +62,15 @@ void usage()
   printf("-v, --version\tPrint the version.\n");
 }
 
-void onSignal(int signal)
-{
+void onSignal(int signal) {
   shutdownClient();
   exit(0);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int iArg, iOptIndex = -1;
 #ifndef NO_OPENSSL
+  srand(getpid()^time(NULL));
   while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:H:S", g_LongOpts, &iOptIndex)) != -1) {
 #else
   while ((iArg = getopt_long(argc, argv, "hvs:p:f:b:t:k:H:", g_LongOpts, &iOptIndex)) != -1) {

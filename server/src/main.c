@@ -20,6 +20,7 @@
 #include "file_callback.h"
 #include "file_observer.h"
 
+#include <time.h>
 #include <event.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -41,8 +42,7 @@ static const struct option g_LongOpts[] = {
   { 0, 0, 0, 0 }
 };
 
-void usage()
-{
+void usage() {
   printf("USAGE: ddfs_server [options]\n");
   printf("-h, --help\tShow this help.\n");
   printf("-v, --version\tPrint the version.\n");
@@ -59,21 +59,20 @@ void usage()
 #endif
 }
 
-void onSignal(int signal)
-{
+void onSignal(int signal) {
   DEBUG("Received the %d signal.", signal);
   fprintf(stderr, "Shutting down.\n");
   closeListener();
   exit(0);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int iArg, iOptIndex = -1;
   struct event_base* event_base = event_base_new();
   initFileObserver(event_base, sendAllFiles);
   unsigned short listen_port = 9002;
 #ifndef NO_OPENSSL
+  srand(getpid()^time(NULL));
   while ((iArg = getopt_long(argc, argv, "hvrf:p:P:C:", g_LongOpts, &iOptIndex)) != -1) {
 #else
   while ((iArg = getopt_long(argc, argv, "hvrf:p:", g_LongOpts, &iOptIndex)) != -1) {

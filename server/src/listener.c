@@ -42,8 +42,7 @@ struct evconnlistener *listener = NULL;
 static void listener_cb(struct evconnlistener *listener, evutil_socket_t fd
                        ,struct sockaddr *sa, int socklen, void *context);
 
-int initListener(struct event_base* event_base, unsigned short listen_port)
-{
+int initListener(struct event_base* event_base, unsigned short listen_port) {
   struct sockaddr_in sin;
   memset(&sin, 0, sizeof(sin));
   sin.sin_family = AF_INET;
@@ -77,15 +76,13 @@ int initListener(struct event_base* event_base, unsigned short listen_port)
   return 1;
 }
 
-void closeListener()
-{
+void closeListener() {
   evconnlistener_free(listener);
   listener = NULL;
 }
 
 static void listener_cb(struct evconnlistener *listener, evutil_socket_t fd
-                       ,struct sockaddr *sa, int socklen, void *context)
-{
+                       ,struct sockaddr *sa, int socklen, void *context) {
   struct event_base* base = (struct event_base*) context;
   struct bufferevent* bev = NULL;
 #ifndef NO_OPENSSL

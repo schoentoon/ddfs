@@ -26,8 +26,7 @@
 
 struct client* clients = NULL;
 
-unsigned int count_clients()
-{
+unsigned int count_clients() {
   unsigned int count = 0;
   struct client* node = clients;
   while (node) {
@@ -37,8 +36,7 @@ unsigned int count_clients()
   return count;
 }
 
-unsigned int write_to_clients(const char* data, size_t size)
-{
+unsigned int write_to_clients(const char* data, size_t size) {
   unsigned int count = 0;
   struct client* node = clients;
   while (node) {
@@ -49,8 +47,7 @@ unsigned int write_to_clients(const char* data, size_t size)
   return count;
 }
 
-void add_client(struct bufferevent* bev)
-{
+void add_client(struct bufferevent* bev) {
   struct client* client = malloc(sizeof(struct client));
   memset(client, 0, sizeof(struct client));
   client->bev = bev;
@@ -67,8 +64,7 @@ void add_client(struct bufferevent* bev)
   DEBUG("There are %d clients left.", count_clients());
 }
 
-void free_client(struct client* client)
-{
+void free_client(struct client* client) {
   struct client* node = clients;
   if (node == client)
     clients = node->next;
@@ -89,15 +85,13 @@ void free_client(struct client* client)
   free(client);
 }
 
-static void keep_alive_timer(evutil_socket_t fd, short event, void *context)
-{
+static void keep_alive_timer(evutil_socket_t fd, short event, void *context) {
   struct client* client = (struct client*) context;
-  char keepalive[] = { '\n' };
+  static const char keepalive[] = { '\n' };
   bufferevent_write(client->bev, &keepalive, 1);
 }
 
-void client_readcb(struct bufferevent* bev, void* context)
-{
+void client_readcb(struct bufferevent* bev, void* context) {
   struct client* client = (struct client*) context;
   struct evbuffer* buffer = bufferevent_get_input(bev);
   char* line = NULL;
@@ -135,8 +129,7 @@ void client_readcb(struct bufferevent* bev, void* context)
   }
 }
 
-void client_eventcb(struct bufferevent* bev, short events, void* context)
-{
+void client_eventcb(struct bufferevent* bev, short events, void* context) {
   if (events != BEV_EVENT_CONNECTED) /* We should NEVER get the connected event here anyway.. */
     free_client((struct client*) context);
   DEBUG("There are %d clients left.", count_clients());

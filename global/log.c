@@ -23,8 +23,7 @@
 #include <stdarg.h>
 #include <sys/time.h>
 
-void write_to_log(FILE* f, const char* format, ...)
-{
+void write_to_log(FILE* f, const char* format, ...) {
   struct timeval tv;
   time_t nowtime;
   struct tm *nowtm;

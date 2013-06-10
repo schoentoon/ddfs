@@ -35,8 +35,7 @@ struct folder_wd_container {
 
 static struct folder_wd_container* folders = NULL;
 
-static void assign_wd_folder(int wd, const char* folder)
-{
+static void assign_wd_folder(int wd, const char* folder) {
   struct folder_wd_container* wd_container = malloc(sizeof(struct folder_wd_container));
   memset(wd_container, 0, sizeof(struct folder_wd_container));
   wd_container->wd = wd;
@@ -50,8 +49,7 @@ static void assign_wd_folder(int wd, const char* folder)
     folders = wd_container;
 }
 
-static void readcb(struct bufferevent* bev, void* args)
-{
+static void readcb(struct bufferevent* bev, void* args) {
   char buf[BUF_LEN];
   size_t numRead;
   while ((numRead = bufferevent_read(bev, buf, BUF_LEN))) {
@@ -71,8 +69,7 @@ static void readcb(struct bufferevent* bev, void* args)
   };
 }
 
-int initFileObserver(struct event_base* event_base, void (*callback)(struct inotify_event*))
-{
+int initFileObserver(struct event_base* event_base, void (*callback)(struct inotify_event*)) {
   if (inotifyfd <= 0)
     inotifyfd = inotify_init();
   if (inotifyfd == -1)
@@ -86,8 +83,7 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
 
 #define DEFAULT_MASK (IN_CLOSE_WRITE|IN_DELETE)
 
-int watch_folder(const char* folder)
-{
+int watch_folder(const char* folder) {
   int wd = inotify_add_watch(inotifyfd, folder, DEFAULT_MASK);
   if (wd == -1) {
     fprintf(stderr, "There was an error adding '%s' to the file observer, error code %d.\n", folder, wd);
@@ -114,8 +110,7 @@ int watch_folder(const char* folder)
   return 1;
 }
 
-char* get_folder(int wd)
-{
+char* get_folder(int wd) {
   struct folder_wd_container* node = folders;
   while (node) {
     if (node->wd == wd)

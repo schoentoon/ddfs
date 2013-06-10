@@ -26,8 +26,7 @@
 
 struct hook *hooks = NULL;
 
-struct hook* new_hook()
-{
+struct hook* new_hook() {
   struct hook* output = malloc(sizeof(struct hook));
   memset(output, 0, sizeof(struct hook));
   if (!hooks)
@@ -43,22 +42,21 @@ struct hook* new_hook()
 
 void* execute_hooks_thread(void* hooks);
 
-void execute_hooks()
-{
+void execute_hooks() {
   if (hooks) {
     pthread_t thread_t;
     pthread_create(&thread_t, NULL, execute_hooks_thread, hooks);
   }
 }
 
-void* execute_hooks_thread(void* hooks)
-{
+void* execute_hooks_thread(void* hooks) {
   struct hook* node = (struct hook*) hooks;
   while (node) {
     DEBUG("Executing %s\n", node->executable);
     int output = system(node->executable);
-    if (output != 0)
+    if (output) {
       DEBUG("There was an error while executing hook '%s'", node->executable);
+    }
     node = node->next;
   }
   return NULL;

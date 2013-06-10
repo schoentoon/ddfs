@@ -59,8 +59,7 @@ static void read_cb(struct bufferevent* bev, void* ctx);
 static void event_cb(struct bufferevent* bev, short events, void* ctx);
 static void createDir(char* filename);
 
-int startClient(struct event_base* event_base)
-{
+int startClient(struct event_base* event_base) {
   if (!dns) {
     dns = evdns_base_new(event_base, 1);
     client = malloc(sizeof(struct client));
@@ -80,14 +79,12 @@ int startClient(struct event_base* event_base)
   return bufferevent_socket_connect_hostname(client->bev, dns, AF_INET, server, port);
 }
 
-void shutdownClient()
-{
+void shutdownClient() {
   if (client->bev)
     bufferevent_free(client->bev);
 }
 
-static void read_cb(struct bufferevent* bev, void* ctx)
-{
+static void read_cb(struct bufferevent* bev, void* ctx) {
   struct client* client = (struct client*) ctx;
   struct evbuffer* buffer = bufferevent_get_input(bev);
   if (client->bytes_left == 0) {

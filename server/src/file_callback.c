@@ -30,8 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-char* getFullPath(char* name, int wd)
-{
+char* getFullPath(char* name, int wd) {
   char* folder = get_folder(wd);
   if (!folder)
     return NULL;
@@ -40,8 +39,7 @@ char* getFullPath(char* name, int wd)
   return strdup(fullpath);
 }
 
-void sendAllFiles(struct inotify_event* event)
-{
+void sendAllFiles(struct inotify_event* event) {
   if (event->mask & IN_CLOSE_WRITE && event->len > 0) {
     char* fullpath = getFullPath(event->name, event->wd);
     if (!fullpath)
