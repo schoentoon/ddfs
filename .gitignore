@@ -11,3 +11,6 @@ build/
 *~
 *.swp
 doc/
+cert
+cert.req
+pkey

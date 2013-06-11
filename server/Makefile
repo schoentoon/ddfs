@@ -2,7 +2,7 @@ CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
 INC    := -Iinclude -I../global $(INC)
 LFLAGS := -levent -levent_openssl -lssl -lcrypto
 VERSION:= $(shell git describe)
-DEFINES:= $(DEFINES) -DVERSION=\"$(VERSION)\"
+DEFINES:= ${DEFINES} -DVERSION=\"$(VERSION)\"
 CC     := gcc
 BINARY := ddfs_server
 DEPS   := build/main.o build/file_observer.o build/listener.o build/client.o build/file_callback.o build/log.o

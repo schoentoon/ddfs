@@ -1,7 +1,10 @@
 CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
 INC    := -Iinclude $(INC)
 LFLAGS := -levent
-DEFINES:= $(DEFINES)
+DEFINES:= ${DEFINES}
+ifdef NO_OPENSSL
+  DEFINES := ${DEFINES} -DNO_OPENSSL
+endif
 CC     := gcc
 
 .PHONY: all clean dev server client install

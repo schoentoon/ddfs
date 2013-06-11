@@ -8,3 +8,6 @@ before_install:
 script: make dev CC=$CC
 after_script:
   - ./scripts/test.sh
+env:
+  - NO_OPENSSL=y
+  -
