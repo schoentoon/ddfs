@@ -5,9 +5,18 @@ compiler:
 before_install:
   - sudo apt-get update -qq >/dev/null 2>&1
   - sudo apt-get install -qq libevent-dev >/dev/null 2>&1
-script: make dev CC=$CC
+script:
+  - make CC=$CC
 after_script:
   - ./scripts/test.sh
 env:
+  - NO_OPENSSL=y DEFINES=-DDEV
+  - DEFINES=-DDEV
   - NO_OPENSSL=y
   -
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#schoentoon"
+    on_success: always
+    on_failure: always
