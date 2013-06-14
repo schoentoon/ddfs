@@ -1,11 +1,13 @@
-CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
-INC    := -Iinclude $(INC)
-LFLAGS := -levent
-DEFINES:= ${DEFINES}
+export CC     := gcc
+export CFLAGS := -Wall -O2 -mtune=native -g
+export LFLAGS := -levent
+VERSION:= $(shell git describe)
 ifdef NO_OPENSSL
-  DEFINES := ${DEFINES} -DNO_OPENSSL
+  export DEFINES := ${DEFINES} -DNO_OPENSSL -DVERSION=\"$(VERSION)\"
+else
+  export LFLAGS := -levent -levent_openssl -lssl -lcrypto
+  export DEFINES:= ${DEFINES} -DVERSION=\"$(VERSION)\"
 endif
-CC     := gcc
 
 .PHONY: all clean dev server client install
 

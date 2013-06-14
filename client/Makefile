@@ -1,9 +1,7 @@
-CFLAGS := $(CFLAGS) -Wall -O2 -mtune=native -g
-INC    := -Iinclude -I../global $(INC)
-LFLAGS := -levent -levent_openssl -lssl -lcrypto -lpthread
-VERSION:= $(shell git describe)
-DEFINES:= ${DEFINES} -DVERSION=\"$(VERSION)\"
-CC     := gcc
+CC     := ${CC}
+CFLAGS := ${CFLAGS}
+INC    := -Iinclude -I../global ${INC}
+LFLAGS := ${LFLAGS} -lpthread
 BINARY := ddfs
 DEPS   := build/main.o build/client.o build/log.o build/hook.o
 
