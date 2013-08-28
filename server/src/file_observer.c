@@ -22,6 +22,8 @@
 
 char recursive = 0;
 
+int max_depth = -1;
+
 static int inotifyfd = 0;
 static void (*inotifycallback)(struct inotify_event*) = NULL;
 
@@ -62,7 +64,7 @@ static void readcb(struct bufferevent* bev, void* args) {
         char* folder = get_folder(event->wd);
         char fullpath[PATH_MAX];
         snprintf(fullpath, sizeof(fullpath), "%s/%s", folder, folder);
-        watch_folder(strdup(fullpath));
+        watch_folder(strdup(fullpath), 0);
       }
       p += sizeof(struct inotify_event) + event->len;
     }
@@ -83,7 +85,7 @@ int initFileObserver(struct event_base* event_base, void (*callback)(struct inot
 
 #define DEFAULT_MASK (IN_CLOSE_WRITE|IN_DELETE)
 
-int watch_folder(const char* folder) {
+int watch_folder(const char* folder, int depth) {
   int wd = inotify_add_watch(inotifyfd, folder, DEFAULT_MASK);
   if (wd == -1) {
     fprintf(stderr, "There was an error adding '%s' to the file observer, error code %d.\n", folder, wd);
@@ -91,7 +93,7 @@ int watch_folder(const char* folder) {
   }
   assign_wd_folder(wd, folder);
   printf("Watching folder '%s'.\n", folder);
-  if (recursive) {
+  if (recursive && (max_depth == -1 || depth < max_depth)) {
     DIR* dir = opendir(folder);
     struct dirent *dp = NULL;
     while ((dp = readdir(dir)) != NULL) {
@@ -99,7 +101,7 @@ int watch_folder(const char* folder) {
         size_t len = strlen(folder) + strlen(dp->d_name) + 2; /* 1 for / and 1 for \0 */
         char fullpath[len];
         snprintf(fullpath, len, "%s/%s", folder, dp->d_name);
-        if (watch_folder(strdup(fullpath)) == 0) {
+        if (watch_folder(strdup(fullpath), depth + 1) == 0) {
           closedir(dir);
           return 0;
         }

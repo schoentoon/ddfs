@@ -24,9 +24,11 @@
 
 char recursive;
 
+int max_depth;
+
 int initFileObserver(struct event_base* event_base, void (*callback)(struct inotify_event*));
 
-int watch_folder(const char* folder);
+int watch_folder(const char* folder, int depth);
 
 char* get_folder(int wd);
 

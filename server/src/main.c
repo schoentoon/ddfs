@@ -32,6 +32,7 @@
 static const struct option g_LongOpts[] = {
   { "help",        no_argument,       0, 'h' },
   { "folder",      required_argument, 0, 'f' },
+  { "max-depth",   required_argument, 0, 'm' },
   { "recursive",   no_argument,       0, 'r' },
   { "port",        required_argument, 0, 'p' },
   { "version",     no_argument,       0, 'v' },
@@ -47,6 +48,7 @@ void usage() {
   printf("-h, --help\tShow this help.\n");
   printf("-v, --version\tPrint the version.\n");
   printf("-f, --folder\tMonitor this folder for files to sync.\n");
+  printf("-m, --max-depth\tGo a max of %%d folders deep, requires --recursive\n");
   printf("-r, --recursive\tMonitor subfolders as well.\n");
   printf("-p, --port\tPort to listen on, defaults to 9002.\n");
 #ifndef NO_OPENSSL
@@ -73,23 +75,35 @@ int main(int argc, char **argv) {
   unsigned short listen_port = 9002;
 #ifndef NO_OPENSSL
   srand(getpid()^time(NULL));
-  while ((iArg = getopt_long(argc, argv, "hvrf:p:P:C:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvrm:f:p:P:C:", g_LongOpts, &iOptIndex)) != -1) {
 #else
-  while ((iArg = getopt_long(argc, argv, "hvrf:p:", g_LongOpts, &iOptIndex)) != -1) {
+  while ((iArg = getopt_long(argc, argv, "hvrm:f:p:", g_LongOpts, &iOptIndex)) != -1) {
 #endif
     switch (iArg) {
     case 'r':
       recursive = 1;
       break;
+    case 'm':
+      errno = 0;
+      max_depth = atoi(optarg);
+      if (errno != 0) {
+        fprintf(stderr, "Failed to parse '%s'\n", optarg);
+        return 1;
+      } else if (max_depth < 0) {
+        fprintf(stderr, "--max-depth should be a positive number.\n");
+        return 1;
+      }
+      break;
     case 'f':
       if (optarg[strlen(optarg)-1] == '/') {
         size_t offset = strlen(optarg)-1;
         optarg[offset] = '\0';
-        watch_folder(optarg);
+        watch_folder(optarg, 0);
       } else
-        watch_folder(optarg);
+        watch_folder(optarg, 0);
       break;
     case 'p': {
+      errno = 0;
       long tmp = strtol(optarg, NULL, 10);
       if ((errno == ERANGE || (tmp == LONG_MAX || tmp == LONG_MIN)) || (errno != 0 && tmp == 0) || tmp < 0 || tmp > 65535) {
         fprintf(stderr, "--port requires a valid port.\n");
